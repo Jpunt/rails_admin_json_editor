@@ -1,0 +1,29 @@
+<div v-show="type == '<%= locals[:component].type %>'">
+  <legend><%= locals[:component].label %></legend>
+  <%= content_tag :p, locals[:component].help, class: "help-block" unless locals[:component].help.nil? %>
+
+  <% locals[:component].fields.each do |f| %>
+    <div class="control-group">
+      <%= label_tag f.name, f.label, class: "control-label" %>
+
+      <div class="controls">
+        <% if f.type == :string %>
+          <%= text_field_tag f.name, nil, 'v-model' => "props.#{f.name}" %>
+        <% end %>
+
+        <% if f.type == :text %>
+          <%= text_area_tag f.name, nil, 'v-model' => "props.#{f.name}" %>
+        <% end %>
+
+        <% if f.type == :picker %>
+          <%= link_to 'Selecteer', '#', role: 'button', class: 'btn',
+            'v-on' => 'click: openPicker',
+            'component-name' => f.name,
+            'component-index' => '{{ $index }}' %>
+        <% end %>
+
+        <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
+      </div>
+    </div>
+  <% end %>
+</div>

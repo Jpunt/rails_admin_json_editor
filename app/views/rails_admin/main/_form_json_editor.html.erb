@@ -1,0 +1,47 @@
+<script type="text/javascript">
+  var recordPickers = {};
+  console.log('yo?')
+</script>
+
+<div ref="components_json" class="components_json">
+  <div v-repeat="components" class="component">
+    <% field.components.each do |component| %>
+      <%= render 'form_json_editor_component', locals: { component: component } %>
+    <% end %>
+  </div>
+
+  <%= render 'form_json_editor_dropdown', locals: { components: field.components } %>
+
+  <%= form.text_area field.name, 'v-model' => 'components', cols:50, rows:10, style: 'margin-top:40px' %>
+</div>
+
+<% field.components
+        .map(&:fields)
+        .flatten
+        .select { |f| f.picker_records != nil }
+        .each do |f| %>
+          <%= render 'form_json_editor_picker', locals: { field:f } %>
+        <% end %>
+
+<script type="text/javascript">
+  var componentsVM = new Vue({
+    el: '[ref=components_json]',
+    data: {
+      components: <%= raw field.value || "[]" %>
+    },
+    methods: {
+      addComponent: function(e) {
+        e.preventDefault();
+        var type = e.target.getAttribute('component-type');
+        this.components.push({ type:type })
+      },
+      openPicker: function(e) {
+        e.preventDefault();
+        var name = e.target.getAttribute('component-name');
+        var index = e.target.getAttribute('component-index');
+        console.log('openPicker', name, index);
+        recordPickers[name].show(index);
+      }
+    }
+  });
+</script>
