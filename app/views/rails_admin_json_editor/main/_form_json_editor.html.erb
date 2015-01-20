@@ -6,11 +6,11 @@
 <div ref="components_json" class="components_json">
   <div v-repeat="components" class="component">
     <% field.components.each do |component| %>
-      <%= render 'form_json_editor_component', locals: { component: component } %>
+      <%= render 'rails_admin_json_editor/main/form_json_editor_component', locals: { component: component } %>
     <% end %>
   </div>
 
-  <%= render 'form_json_editor_dropdown', locals: { components: field.components } %>
+  <%= render 'rails_admin_json_editor/main/form_json_editor_dropdown', locals: { components: field.components } %>
 
   <%= form.text_area field.name, 'v-model' => 'components', cols:50, rows:10, style: 'margin-top:40px' %>
 </div>
@@ -20,7 +20,7 @@
         .flatten
         .select { |f| f.picker_records != nil }
         .each do |f| %>
-          <%= render 'form_json_editor_picker', locals: { field:f } %>
+          <%= render 'rails_admin_json_editor/main/form_json_editor_picker', locals: { field:f } %>
         <% end %>
 
 <script type="text/javascript">
