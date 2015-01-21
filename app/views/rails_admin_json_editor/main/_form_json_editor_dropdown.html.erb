@@ -1,9 +1,0 @@
-<div class="dropdown">
-  <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Component toevoegen <b class="caret"></b></a>
-
-  <ul class="dropdown-menu">
-    <% locals[:components].each do |component| %>
-      <li><a href="#" v-on="click: addComponent" component-type="<%= component.type %>"><%= component.type %></a></li>
-    <% end %>
-  </ul>
-</div>

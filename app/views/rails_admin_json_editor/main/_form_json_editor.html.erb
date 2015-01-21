@@ -3,24 +3,63 @@
 </script>
 
 <div ref="components_json" class="components_json">
+
+  <!-- List content -->
   <div v-repeat="components" class="component">
     <% field.components.each do |component| %>
-      <%= render 'rails_admin_json_editor/main/form_json_editor_component', locals: { component: component } %>
+      <div v-if="type == '<%= component.type %>'">
+        <legend><%= component.label %></legend>
+        <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
+
+        <% component.fields.each do |f| %>
+          <div class="control-group">
+            <%= label_tag f.name, f.label, class: "control-label" %>
+
+            <div class="controls">
+              <% if f.type == :string %>
+                <%= text_field_tag f.name, nil, 'v-model' => "props.#{f.name}" %>
+              <% end %>
+
+              <% if f.type == :text %>
+                <%= text_area_tag f.name, nil, 'v-model' => "props.#{f.name}" %>
+              <% end %>
+
+              <% if f.type == :picker %>
+                  <select v-on="change: onChangePicker($event, $index, '<%= f.name %>')" placeholder="Zoeken">
+                    <option value=""></option>
+                    <% f.picker_records.each do |record| %>
+                      <option
+                        v-attr="selected: pickerOptionIsSelected(this, '<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
+                        value="<%= record.send(f.picker_label) %>"
+                        data-json="<%= record.to_json %>">
+                          <%= record.send(f.picker_label) %>
+                      </option>
+                    <% end %>
+                  </select>
+              <% end %>
+
+              <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
+            </div>
+          </div>
+        <% end %>
+      </div>
     <% end %>
   </div>
 
-  <%= render 'rails_admin_json_editor/main/form_json_editor_dropdown', locals: { components: field.components } %>
+  <!-- Dropdown to add new content -->
+  <div class="dropdown">
+    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Component toevoegen <b class="caret"></b></a>
 
-  <%= form.text_area field.name, 'v-model' => 'components', cols:50, rows:10, style: 'margin-top:40px' %>
+    <ul class="dropdown-menu">
+      <% field.components.each do |component| %>
+        <li><a href="#" v-on="click: addComponent" component-type="<%= component.type %>"><%= component.type %></a></li>
+      <% end %>
+    </ul>
+  </div>
+
+  <!-- Hidden field to store JSON -->
+  <%= form.text_area field.name, 'v-model' => 'components | json', cols:50, rows:10, style: 'margin-top:40px' %>
 </div>
-
-<% field.components
-        .map(&:fields)
-        .flatten
-        .select { |f| f.picker_records != nil }
-        .each do |f| %>
-          <%= render 'rails_admin_json_editor/main/form_json_editor_picker', locals: { field:f } %>
-        <% end %>
 
 <script type="text/javascript">
   var componentsVM = new Vue({
@@ -32,14 +71,28 @@
       addComponent: function(e) {
         e.preventDefault();
         var type = e.target.getAttribute('component-type');
-        this.components.push({ type:type })
+        this.components.push({ type:type, props:{} })
       },
-      openPicker: function(e) {
-        e.preventDefault();
-        var name = e.target.getAttribute('component-name');
-        var index = e.target.getAttribute('component-index');
-        console.log('openPicker', name, index);
-        recordPickers[name].show(index);
+      onChangePicker: function(e, index, fieldName) {
+        var el = e.target;
+        var value = el.options[el.selectedIndex].getAttribute('data-json');
+        var json = JSON.parse(value);
+
+        var props = {};
+        props[fieldName] = json;
+
+        var data = $.extend({}, componentsVM.components[index], {
+          props: props
+        });
+
+        componentsVM.components.$set(index, data)
+      },
+      pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
+        return component.$data
+          && component.$data.props
+          && component.$data.props[fieldName]
+          && component.$data.props[fieldName][recordLabel] == recordName
+          && component.$data.props[fieldName][recordLabel] == recordName;
       }
     }
   });

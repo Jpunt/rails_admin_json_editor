@@ -66,6 +66,7 @@ module RailsAdmin
           class Field
             attr_accessor :name, :type
             attr_accessor :label, :help
+            attr_accessor :picker_label
             attr_accessor :picker_records
 
             def initialize(name, type)
@@ -82,8 +83,9 @@ module RailsAdmin
               if s.nil? then return @help else @help = s end
             end
 
-            def picker_records(a = nil)
-              if a.nil? then return @picker_records else @picker_records = a end
+            def setup_picker(label, records)
+              @picker_label = label
+              @picker_records = records
             end
           end
         end
