@@ -1,6 +1,7 @@
-<%= javascript_include_tag "rails_admin_json_editor/rails_admin_json_editor.js" %>
+<%= javascript_include_tag "rails_admin_json_editor/rails_admin_json_editor" %>
+<%= stylesheet_link_tag "rails_admin_json_editor/rails_admin_json_editor", media: 'all' %>
 
-<div ref="components_json" class="components_json" data-json="<%= raw(field.value.empty? ? "[]" : field.value) %>">
+<div ref="json-editor" class="json-editor" data-json="<%= raw(field.value.empty? ? "[]" : field.value) %>">
   <!-- List content -->
   <div v-repeat="components" class="component">
     <% field.components.each do |component| %>
@@ -9,20 +10,20 @@
         <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
 
         <% component.fields.each do |f| %>
-          <div class="control-group">
-            <%= label_tag f.name, f.label, class: "control-label" %>
+          <div class="control-group row">
+            <%= label_tag f.name, f.label, class: "col-sm-2 control-label" %>
 
-            <div class="controls">
+            <div class="controls col-sm-10">
               <% if f.type == :string %>
-                <%= text_field_tag f.name, nil, 'v-model' => "props.#{f.name}" %>
+                <%= text_field_tag f.name, nil, class: 'form-control', 'v-model' => "props.#{f.name}" %>
               <% end %>
 
               <% if f.type == :text %>
-                <%= text_area_tag f.name, nil, 'v-model' => "props.#{f.name}" %>
+                <%= text_area_tag f.name, nil, class: 'form-control', 'v-model' => "props.#{f.name}" %>
               <% end %>
 
               <% if f.type == :picker %>
-                <select v-on="change: onChangePicker($event, $index, '<%= f.name %>')" placeholder="Zoeken">
+                <select v-on="change: onChangePicker($event, $index, '<%= f.name %>')" class="form-control record-picker">
                   <option value=""></option>
                   <% f.picker_records.each do |record| %>
                     <option
@@ -55,5 +56,5 @@
   </div>
 
   <!-- Hidden field to store JSON -->
-  <%= form.text_area field.name, 'v-model' => 'components | json', cols:50, rows:10, style: 'margin-top:40px' %>
+  <%= form.hidden_field field.name, 'v-model' => 'components | json', cols:50, rows:10, style: 'margin-top:40px' %>
 </div>

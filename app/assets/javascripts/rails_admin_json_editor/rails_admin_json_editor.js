@@ -6,9 +6,9 @@ $(document).on('rails_admin.dom_ready', function() {
   var recordPickers = {};
 
   var componentsVM = new Vue({
-    el: '[ref=components_json]',
+    el: '[ref=json-editor]',
     data: {
-      components: $('[ref=components_json]').data('json')
+      components: $('[ref=json-editor]').data('json')
     },
     methods: {
       addComponent: function(e) {

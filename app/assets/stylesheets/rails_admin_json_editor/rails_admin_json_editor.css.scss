@@ -1,0 +1,11 @@
+body.rails_admin .form-horizontal.denser .json-editor {
+  .component {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  .record-picker,
+  textarea {
+    width: 181px;
+  }
+}
