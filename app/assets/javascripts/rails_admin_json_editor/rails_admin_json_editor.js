@@ -3,18 +3,27 @@
 $(document).on('rails_admin.dom_ready', function() {
   // TODO: Make this possible for multiple instances
 
-  var recordPickers = {};
+  var data = $('[ref=json-editor]').data('json');
+  if(!data) {
+    data = { components: [] };
+  }
 
   var componentsVM = new Vue({
     el: '[ref=json-editor]',
-    data: {
-      components: $('[ref=json-editor]').data('json')
-    },
+    data: data,
     methods: {
       addComponent: function(e) {
         e.preventDefault();
         var type = e.target.getAttribute('component-type');
-        this.components.push({ type:type, props:{} })
+        this.components.push({
+          type: type,
+          props: {}
+        })
+      },
+      removeComponent: function(index) {
+        if(confirm("Are you sure?")) {
+          this.components.$remove(index);
+        }
       },
       onChangePicker: function(e, index, fieldName) {
         var el = e.target;

@@ -1,12 +1,23 @@
 <%= javascript_include_tag "rails_admin_json_editor/rails_admin_json_editor" %>
 <%= stylesheet_link_tag "rails_admin_json_editor/rails_admin_json_editor", media: 'all' %>
 
-<div ref="json-editor" class="json-editor" data-json="<%= raw(field.value.empty? ? "[]" : field.value) %>">
+<div ref="json-editor"
+  class="json-editor"
+  data-json='<%= raw(field.value.blank? ? '{ "components":[] }' : field.value) %>'>
+
   <!-- List content -->
   <div v-repeat="components" class="component">
     <% field.components.each do |component| %>
       <div v-if="type == '<%= component.type %>'">
-        <legend><%= component.label %></legend>
+        <legend>
+          <%= component.label %>
+          <div class="btn-group btn-group-sm pull-right">
+            <button v-on="click:removeComponent($index)" type="button" class="btn btn-default">
+              <i class="icon-remove"></i>
+            </button>
+          </div>
+        </legend>
+
         <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
 
         <% component.fields.each do |f| %>
@@ -56,5 +67,5 @@
   </div>
 
   <!-- Hidden field to store JSON -->
-  <%= form.hidden_field field.name, 'v-model' => 'components | json', cols:50, rows:10, style: 'margin-top:40px' %>
+  <%= form.text_area field.name, 'v-model' => '$root.$data | json', cols:50, rows:10, style: 'margin-top:40px' %>
 </div>

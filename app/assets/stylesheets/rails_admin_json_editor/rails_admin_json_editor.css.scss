@@ -4,8 +4,7 @@ body.rails_admin .form-horizontal.denser .json-editor {
     margin-bottom: 15px;
   }
 
-  .record-picker,
-  textarea {
-    width: 181px;
+  .form-control {
+    width: 90%;
   }
 }
