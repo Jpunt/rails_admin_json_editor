@@ -1,9 +1,6 @@
-<script type="text/javascript">
-  var recordPickers = {};
-</script>
+<%= javascript_include_tag "rails_admin_json_editor/rails_admin_json_editor.js" %>
 
-<div ref="components_json" class="components_json">
-
+<div ref="components_json" class="components_json" data-json="<%= raw(field.value.empty? ? "[]" : field.value) %>">
   <!-- List content -->
   <div v-repeat="components" class="component">
     <% field.components.each do |component| %>
@@ -60,40 +57,3 @@
   <!-- Hidden field to store JSON -->
   <%= form.text_area field.name, 'v-model' => 'components | json', cols:50, rows:10, style: 'margin-top:40px' %>
 </div>
-
-<script type="text/javascript">
-  var componentsVM = new Vue({
-    el: '[ref=components_json]',
-    data: {
-      components: <%= raw(field.value.empty? ? "[]" : field.value) %>
-    },
-    methods: {
-      addComponent: function(e) {
-        e.preventDefault();
-        var type = e.target.getAttribute('component-type');
-        this.components.push({ type:type, props:{} })
-      },
-      onChangePicker: function(e, index, fieldName) {
-        var el = e.target;
-        var value = el.options[el.selectedIndex].getAttribute('data-json');
-        var json = JSON.parse(value);
-
-        var props = {};
-        props[fieldName] = json;
-
-        var data = $.extend({}, componentsVM.components[index], {
-          props: props
-        });
-
-        componentsVM.components.$set(index, data)
-      },
-      pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
-        return component.$data
-          && component.$data.props
-          && component.$data.props[fieldName]
-          && component.$data.props[fieldName][recordLabel] == recordName
-          && component.$data.props[fieldName][recordLabel] == recordName;
-      }
-    }
-  });
-</script>
