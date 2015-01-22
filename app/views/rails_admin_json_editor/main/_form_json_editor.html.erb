@@ -12,8 +12,8 @@
         <legend>
           <%= component.label %>
           <div class="btn-group btn-group-sm pull-right">
-            <button v-on="click: cms.expanded = !cms.expanded" type="button" class="btn btn-default">
-              <i class="{{ cms.expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
+            <button v-on="click: tmp.expanded = !tmp.expanded" type="button" class="btn btn-default">
+              <i class="{{ tmp.expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
             </button>
             <button v-on="click:removeComponent($index)" type="button" class="btn btn-default">
               <i class="icon-remove"></i>
@@ -21,7 +21,7 @@
           </div>
         </legend>
 
-        <div v-show="cms.expanded">
+        <div v-show="tmp.expanded">
           <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
 
           <% component.fields.each do |f| %>
@@ -61,7 +61,7 @@
   </div>
 
   <!-- Dropdown to add new content -->
-  <div class="dropdown">
+  <div class="dropdown pull-left">
     <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Component toevoegen <b class="caret"></b></a>
 
     <ul class="dropdown-menu">
@@ -72,5 +72,15 @@
   </div>
 
   <!-- Hidden field to store JSON -->
-  <%= form.text_area field.name, value: '', 'v-model' => '$root.$data | json', cols:50, rows:10, style: 'margin-top:40px' %>
+  <div>
+    <% if Rails.env.development? %>
+      <button v-on="click: tmp.showJson = !tmp.showJson" type="button" class="btn btn-default pull-right">
+        <i class="icon-list-alt"></i>
+      </button>
+    <% end %>
+
+    <div v-show="tmp.showJson">
+      <%= form.text_area field.name, value: field.value, 'v-model' => '$root.$data | json', style: 'width:100%; height:400px; margin-top:20px' %>
+    </div>
+  </div>
 </div>
