@@ -6,13 +6,19 @@
   data-json='<%= raw(field.value.blank? ? '{ "components":[] }' : field.value) %>'>
 
   <!-- List content -->
-  <div v-repeat="components" class="component">
+  <div v-repeat="component: components" class="component">
     <% field.components.each do |component| %>
-      <div v-if="type == '<%= component.type %>'">
+      <div v-if="component.type == '<%= component.type %>'">
         <legend>
           <%= component.label %>
           <div class="btn-group btn-group-sm pull-right">
-            <button v-on="click: tmp.expanded = !tmp.expanded" type="button" class="btn btn-default">
+            <button v-on="click: moveComponentUp($index)" type="button" class="btn btn-default {{ $index == 0 ? 'disabled' : '' }}">
+              <i class="icon-circle-arrow-up"></i>
+            </button>
+            <button v-on="click: moveComponentDown($index)" type="button" class="btn btn-default {{ $index == components.length - 1 ? 'disabled' : '' }}">
+              <i class="icon-circle-arrow-down"></i>
+            </button>
+            <button v-on="click: component.tmp.expanded = !component.tmp.expanded" type="button" class="btn btn-default">
               <i class="{{ tmp.expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
             </button>
             <button v-on="click:removeComponent($index)" type="button" class="btn btn-default">
@@ -21,7 +27,7 @@
           </div>
         </legend>
 
-        <div v-show="tmp.expanded">
+        <div v-show="component.tmp.expanded">
           <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
 
           <% component.fields.each do |f| %>
@@ -30,11 +36,11 @@
 
               <div class="controls col-sm-10">
                 <% if f.type == :string %>
-                  <%= text_field_tag f.name, nil, class: 'form-control', 'v-model' => "props.#{f.name}" %>
+                  <%= text_field_tag f.name, nil, class: 'form-control', 'v-model' => "component.props.#{f.name}" %>
                 <% end %>
 
                 <% if f.type == :text %>
-                  <%= text_area_tag f.name, nil, class: 'form-control', 'v-model' => "props.#{f.name}" %>
+                  <%= text_area_tag f.name, nil, class: 'form-control', 'v-model' => "component.props.#{f.name}" %>
                 <% end %>
 
                 <% if f.type == :picker %>
@@ -42,7 +48,7 @@
                     <option value=""></option>
                     <% f.picker_records.each do |record| %>
                       <option
-                        v-attr="selected: pickerOptionIsSelected(this, '<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
+                        v-attr="selected: pickerOptionIsSelected(component, '<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
                         value="<%= record.send(f.picker_label) %>"
                         data-json="<%= record.to_json %>">
                           <%= record.send(f.picker_label) %>

@@ -42,6 +42,20 @@ $(document).on('rails_admin.dom_ready', function() {
           this.components.$remove(index);
         }
       },
+      moveComponentUp: function(index) {
+        var from = index;
+        var to = index - 1;
+        var element = this.components[from];
+        this.components.splice(from, 1);
+        this.components.splice(to, 0, element);
+      },
+      moveComponentDown: function(index) {
+        var from = index;
+        var to = index + 1;
+        var element = this.components[from];
+        this.components.splice(from, 1);
+        this.components.splice(to, 0, element);
+      },
       onChangePicker: function(e, index, fieldName) {
         var el = e.target;
         var value = el.options[el.selectedIndex].getAttribute('data-json');
@@ -57,11 +71,9 @@ $(document).on('rails_admin.dom_ready', function() {
         componentsVM.components.$set(index, data)
       },
       pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
-        return component.$data
-          && component.$data.props
-          && component.$data.props[fieldName]
-          && component.$data.props[fieldName][recordLabel] == recordName
-          && component.$data.props[fieldName][recordLabel] == recordName;
+        return component.props[fieldName]
+          && component.props[fieldName][recordLabel]
+          && component.props[fieldName][recordLabel] == recordName;
       }
     }
   });
