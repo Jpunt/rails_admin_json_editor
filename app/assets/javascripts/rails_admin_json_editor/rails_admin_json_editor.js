@@ -1,12 +1,20 @@
 //= require rails_admin_json_editor/vue.0.11.4
+//= require rails_admin_json_editor/lodash.2.4.1
 
 $(document).on('rails_admin.dom_ready', function() {
   // TODO: Make this possible for multiple instances
+
+  var cmsDefaults = { expanded: true };
 
   var data = $('[ref=json-editor]').data('json');
   if(!data) {
     data = { components: [] };
   }
+
+  data.components = _.map(data.components, function(component) {
+    if(!component.cms) component.cms = _.clone(cmsDefaults);
+    return component;
+  });
 
   var componentsVM = new Vue({
     el: '[ref=json-editor]',
@@ -17,7 +25,8 @@ $(document).on('rails_admin.dom_ready', function() {
         var type = e.target.getAttribute('component-type');
         this.components.push({
           type: type,
-          props: {}
+          props: {},
+          cms: _.clone(cmsDefaults)
         })
       },
       removeComponent: function(index) {
