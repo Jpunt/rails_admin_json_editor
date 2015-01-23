@@ -80,7 +80,7 @@
   <!-- Hidden field to store JSON -->
   <div>
     <% if Rails.env.development? %>
-      <button v-on="click: tmp.showJson = !tmp.showJson" type="button" class="btn btn-default pull-right">
+      <button v-on="click: tmp.showJson = !tmp.showJson" type="button" class="btn btn-default pull-left btn-toggle-json">
         <i class="icon-list-alt"></i>
       </button>
     <% end %>
