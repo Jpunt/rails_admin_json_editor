@@ -31,36 +31,63 @@ $(document).on('rails_admin.dom_ready', function() {
           expanded: true
         };
       },
+      computed: {
+        moveUpEnabled: function() {
+          return this.parentIndex > 0;
+        },
+        moveDownEnabled: function() {
+          return this.parentIndex < this.parentComponents.length - 1;
+        }
+      },
       methods: {
         moveUp: function() {
-          var from = this.index;
-          var to = this.index - 1;
-          var element = this.$parent.components[from];
-          this.$parent.components.splice(from, 1);
-          this.$parent.components.splice(to, 0, element);
+          var from = this.parentIndex;
+          var to = this.parentIndex - 1;
+          var element = this.parentComponents[from];
+          this.parentComponents.splice(from, 1);
+          this.parentComponents.splice(to, 0, element);
         },
 
         moveDown: function() {
-          var from = this.index;
-          var to = this.index + 1;
-          var element = this.$parent.components[from];
-          this.$parent.components.splice(from, 1);
-          this.$parent.components.splice(to, 0, element);
+          var from = this.parentIndex;
+          var to = this.parentIndex + 1;
+          var element = this.parentComponents[from];
+          this.parentComponents.splice(from, 1);
+          this.parentComponents.splice(to, 0, element);
         },
 
         remove: function() {
           if(confirm("Are you sure?")) {
-            this.$parent.components.$remove(this.index);
+            this.parentComponents.$remove(this.parentIndex);
           }
         },
 
-        onChangePicker: function(event, index, fieldName) {
+        // TODO: DRY up with $root.addComponent
+        addComponent: function(event, component, type) {
+          event.preventDefault();
+
+          var clonedProps = _.clone(component.props);
+          if(!clonedProps.components) {
+            clonedProps.components = []
+          }
+
+          var obj = {
+            type: type,
+            props: {}
+          };
+
+          clonedProps.components.push(obj);
+          this.parentComponents[this.parentIndex].props = clonedProps;
+        },
+
+        onChangePicker: function(event, component, fieldName) {
           var el = event.target;
           var value = el.options[el.selectedIndex].getAttribute('data-json');
           var json = JSON.parse(value);
-          var clonedData = _.clone(this.$parent.components[index]);
-          clonedData.props[fieldName] = json;
-          this.$parent.components.$set(index, clonedData);
+
+          var clonedProps = _.clone(component.props);
+          clonedProps[fieldName] = json;
+          this.parentComponents[this.parentIndex].props = clonedProps;
         },
 
         pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
@@ -79,16 +106,18 @@ $(document).on('rails_admin.dom_ready', function() {
     data: {
       components: jsonResult.components,
       componentTypes: jsonComponentTypes,
-      showJson: true
+      showJson: false
     },
     methods: {
       addComponent: function(e, type) {
         e.preventDefault();
 
-        this.result.components.push({
+        var obj = {
           type: type,
           props: {}
-        });
+        };
+
+        this.components.push(obj);
       }
     },
     computed: {
@@ -98,56 +127,4 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     components: components
   });
-
-  // Component fields component
-  // Vue.component('fields-for-component', {
-  //   template: '#template-fields-for-component',
-  //   data: function() {
-  //     return {
-  //       type: null,
-  //       props: {},
-  //       tmp: _.clone(componentTmpDefaults)
-  //     }
-  //   },
-  //   methods: {
-  //
-  //   }
-  // })
-
-
-  // // Let's go
-  // var componentsVM = new Vue({
-  //   el: '[ref=json-editor]',
-  //   data: data,
-  //   methods: {
-  //     addComponent: function(e) {
-  //       e.preventDefault();
-  //       var type = e.target.getAttribute('component-type');
-  //       this.components.push({
-  //         type: type,
-  //         props: {},
-  //         tmp: _.clone(componentTmpDefaults)
-  //       })
-  //     },
-  //     removeComponent: function(index) {
-  //       if(confirm("Are you sure?")) {
-  //         this.components.$remove(index);
-  //       }
-  //     },
-  //     moveComponentUp: function(index) {
-  //       var from = index;
-  //       var to = index - 1;
-  //       var element = this.components[from];
-  //       this.components.splice(from, 1);
-  //       this.components.splice(to, 0, element);
-  //     },
-  //     moveComponentDown: function(index) {
-  //       var from = index;
-  //       var to = index + 1;
-  //       var element = this.components[from];
-  //       this.components.splice(from, 1);
-  //       this.components.splice(to, 0, element);
-  //     }
-  //   }
-  // });
 });

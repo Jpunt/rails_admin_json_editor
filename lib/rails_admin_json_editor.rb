@@ -43,7 +43,7 @@ module RailsAdmin
             def initialize(type)
               @type = type
               @fields = []
-              @label = type
+              @label = type.to_s.humanize
             end
 
             def field(name, type)
@@ -68,11 +68,13 @@ module RailsAdmin
             attr_accessor :label, :help
             attr_accessor :picker_label
             attr_accessor :picker_records
+            attr_accessor :components
 
             def initialize(name, type)
               @name = name
               @type = type
-              @label = name
+              @label = name.to_s.humanize
+              @components = [] if type == :list
             end
 
             def label(s = nil)
@@ -86,6 +88,14 @@ module RailsAdmin
             def setup_picker(label, records)
               @picker_label = label
               @picker_records = records
+            end
+
+            def component(type)
+              component = Component.new(type)
+
+              yield(component) if block_given?
+
+              @components << component
             end
           end
         end
