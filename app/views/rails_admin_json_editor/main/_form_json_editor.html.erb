@@ -3,8 +3,103 @@
 
 <div ref="json-editor"
   class="json-editor"
-  data-json='<%= raw(field.value.blank? ? '{ "components":[] }' : field.value) %>'>
+  data-json-result='<%= raw(field.value.blank? ? '{ "components":[] }' : field.value) %>'
+  data-json-component-types='<%= raw field.components.to_json %>'>
 
+  <% field.components.each do |component| %>
+    <script type="text/x-template" id="template-component-type-<%= component.type %>">
+      <div class="component">
+        <legend>
+          <%= component.label %>
+          <div class="btn-group btn-group-sm pull-right">
+            <button v-on="click: moveUp" type="button" class="btn btn-default {{ index == 0 ? 'disabled' : '' }}">
+              <i class="icon-circle-arrow-up"></i>
+            </button>
+            <button v-on="click: moveDown" type="button" class="btn btn-default {{ index == componentLength - 1 ? 'disabled' : '' }}">
+              <i class="icon-circle-arrow-down"></i>
+            </button>
+            <button v-on="click: expanded = !expanded" type="button" class="btn btn-default">
+              <i class="{{ expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
+            </button>
+            <button v-on="click:remove" type="button" class="btn btn-default">
+              <i class="icon-remove"></i>
+            </button>
+          </div>
+        </legend>
+
+        <div v-show="expanded">
+          <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
+
+          <% component.fields.each do |f| %>
+            <div class="control-group row">
+              <label class="col-sm-2 control-label"><%= f.label %></label>
+
+              <div class="controls col-sm-10">
+                <% if f.type == :string %>
+                  <input v-model="component.props.<%= f.name %>" type="text" class="form-control" />
+                <% end %>
+
+                <% if f.type == :text %>
+                  <textarea v-model="component.props.<%= f.name %>" class="form-control"></textarea>
+                <% end %>
+
+                <% if f.type == :picker %>
+                  <select v-on="change: onChangePicker($event, index, '<%= f.name %>')" class="form-control record-picker">
+                    <option value=""></option>
+                    <% f.picker_records.each do |record| %>
+                      <option
+                        v-attr="selected: pickerOptionIsSelected(component, '<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
+                        value="<%= record.send(f.picker_label) %>"
+                        data-json="<%= record.to_json %>">
+                          <%= record.send(f.picker_label) %>
+                      </option>
+                    <% end %>
+                  </select>
+                <% end %>
+
+                <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </script>
+  <% end %>
+
+  <!-- List all components and their fields -->
+  <div v-repeat="component: result.components">
+    <div v-component="component-type-{{ component.type }}" v-with="component: component, index: $index, componentLength: result.components.length"></div>
+  </div>
+
+  <!-- Dropdown to add new content -->
+  <div class="dropdown pull-left">
+    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Component toevoegen <b class="caret"></b></a>
+
+    <ul class="dropdown-menu">
+      <li v-repeat="componentType: componentTypes">
+        <a href="#" v-on="click: addComponent($event, componentType.type)">{{ componentType.type }}</a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Hidden field to store JSON -->
+  <div>
+    <% if Rails.env.development? %>
+      <button v-on="click: showJson = !showJson" type="button" class="btn btn-default pull-left btn-toggle-json">
+        <i class="icon-list-alt"></i>
+      </button>
+    <% end %>
+
+    <div v-show="showJson">
+      <%= form.text_area field.name,
+        'v-model' => 'result | json',
+        value: field.value,
+        ref: 'json-textarea',
+        style: 'width:100%; height:400px; margin-top:20px' %>
+    </div>
+  </div>
+
+  <% if false %>
   <!-- List content -->
   <div v-repeat="component: components" class="component">
     <% field.components.each do |component| %>
@@ -18,8 +113,8 @@
             <button v-on="click: moveComponentDown($index)" type="button" class="btn btn-default {{ $index == components.length - 1 ? 'disabled' : '' }}">
               <i class="icon-circle-arrow-down"></i>
             </button>
-            <button v-on="click: component.tmp.expanded = !component.tmp.expanded" type="button" class="btn btn-default">
-              <i class="{{ component.tmp.expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
+            <button v-on="click: component.expanded = !component.expanded" type="button" class="btn btn-default">
+              <i class="{{ expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
             </button>
             <button v-on="click:removeComponent($index)" type="button" class="btn btn-default">
               <i class="icon-remove"></i>
@@ -27,7 +122,7 @@
           </div>
         </legend>
 
-        <div v-show="component.tmp.expanded">
+        <div v-show="expanded">
           <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
 
           <% component.fields.each do |f| %>
@@ -86,7 +181,12 @@
     <% end %>
 
     <div v-show="tmp.showJson">
-      <%= form.text_area field.name, value: field.value, 'v-model' => '$root.$data | json', style: 'width:100%; height:400px; margin-top:20px' %>
+      <%= form.text_area field.name,
+        'v-model' => 'result | json',
+        value: field.value,
+        ref:'json-textarea',
+        style: 'width:100%; height:400px; margin-top:20px' %>
     </div>
   </div>
+  <% end %>
 </div>

@@ -1,80 +1,149 @@
 //= require rails_admin_json_editor/vue.0.11.4
 //= require rails_admin_json_editor/lodash.2.4.1
 
+var vm;
+
 $(document).on('rails_admin.dom_ready', function() {
   // TODO: Make this possible for multiple instances
 
+  // Vue.config.debug = true
+
   // Get data
-  var data = $('[ref=json-editor]').data('json');
-  if(!data) {
-    data = { components: [] };
+  var jsonResult          = $('[ref=json-editor]').data('json-result');
+  var jsonComponentTypes  = $('[ref=json-editor]').data('json-component-types');
+
+  if(!jsonResult) {
+    jsonResult = { components: [] };
   }
 
-  // Re-initialize temporary vars
-  data.tmp = { showJson: false };
-
-  // Re-initialMake sure all components have their (possibly new) defaults
-  var componentTmpDefaults = { expanded: true };
-  data.components = _.map(data.components, function(component) {
-    component.tmp = _.clone(componentTmpDefaults);
-    return component;
-  });
-
   // Make sure we let Vue update the json-field, but do it here to prevent data-loss when js is disabled
-  $('[ref=json-editor] [v-model^="$root.$data"]').val('');
+  $('[ref=json-textarea]').val('');
+
+  // Setup dynamic component-type components
+  var components = {};
+  _.each(jsonComponentTypes, function(c) {
+    components['component-type-' + c.type] = {
+      template: '#template-component-type-' + c.type,
+      data: function() {
+        return {
+          type: null,
+          props: {},
+          expanded: true
+        };
+      },
+      methods: {
+        moveUp: function() {
+          var from = this.index;
+          var to = this.index - 1;
+          var element = this.$parent.result.components[from];
+          this.$parent.result.components.splice(from, 1);
+          this.$parent.result.components.splice(to, 0, element);
+        },
+
+        moveDown: function() {
+          var from = this.index;
+          var to = this.index + 1;
+          var element = this.$parent.result.components[from];
+          this.$parent.result.components.splice(from, 1);
+          this.$parent.result.components.splice(to, 0, element);
+        },
+
+        remove: function() {
+          console.log(this);
+          if(confirm("Are you sure?")) {
+            this.$parent.result.components.$remove(this.index);
+          }
+        },
+
+        onChangePicker: function(event, index, fieldName) {
+          var el = event.target;
+          var value = el.options[el.selectedIndex].getAttribute('data-json');
+          var json = JSON.parse(value);
+          var clonedData = _.clone(this.$parent.result.components[index]);
+          clonedData.props[fieldName] = json;
+          this.$parent.result.components.$set(index, clonedData);
+        },
+
+        pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
+          return component.props &&
+            component.props[fieldName] &&
+            component.props[fieldName][recordLabel] &&
+            component.props[fieldName][recordLabel] === recordName;
+        }
+      }
+    };
+  });
 
   // Let's go
-  var componentsVM = new Vue({
+  vm = new Vue({
     el: '[ref=json-editor]',
-    data: data,
+    data: {
+      result: jsonResult,
+      componentTypes: jsonComponentTypes,
+      showJson: true
+    },
     methods: {
-      addComponent: function(e) {
+      addComponent: function(e, type) {
         e.preventDefault();
-        var type = e.target.getAttribute('component-type');
-        this.components.push({
+
+        this.result.components.push({
           type: type,
-          props: {},
-          tmp: _.clone(componentTmpDefaults)
-        })
-      },
-      removeComponent: function(index) {
-        if(confirm("Are you sure?")) {
-          this.components.$remove(index);
-        }
-      },
-      moveComponentUp: function(index) {
-        var from = index;
-        var to = index - 1;
-        var element = this.components[from];
-        this.components.splice(from, 1);
-        this.components.splice(to, 0, element);
-      },
-      moveComponentDown: function(index) {
-        var from = index;
-        var to = index + 1;
-        var element = this.components[from];
-        this.components.splice(from, 1);
-        this.components.splice(to, 0, element);
-      },
-      onChangePicker: function(e, index, fieldName) {
-        var el = e.target;
-        var value = el.options[el.selectedIndex].getAttribute('data-json');
-        var json = JSON.parse(value);
-
-        var props = {};
-        props[fieldName] = json;
-
-        var data = $.extend({}, componentsVM.components[index], {
-          props: props
+          props: {}
         });
-
-        componentsVM.components.$set(index, data)
-      },
-      pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
-        return component.props[fieldName]
-          && component.props[fieldName][recordLabel]
-          && component.props[fieldName][recordLabel] == recordName;
       }
-    }
+    },
+    components: components
   });
+
+  // Component fields component
+  // Vue.component('fields-for-component', {
+  //   template: '#template-fields-for-component',
+  //   data: function() {
+  //     return {
+  //       type: null,
+  //       props: {},
+  //       tmp: _.clone(componentTmpDefaults)
+  //     }
+  //   },
+  //   methods: {
+  //
+  //   }
+  // })
+
+
+  // // Let's go
+  // var componentsVM = new Vue({
+  //   el: '[ref=json-editor]',
+  //   data: data,
+  //   methods: {
+  //     addComponent: function(e) {
+  //       e.preventDefault();
+  //       var type = e.target.getAttribute('component-type');
+  //       this.components.push({
+  //         type: type,
+  //         props: {},
+  //         tmp: _.clone(componentTmpDefaults)
+  //       })
+  //     },
+  //     removeComponent: function(index) {
+  //       if(confirm("Are you sure?")) {
+  //         this.components.$remove(index);
+  //       }
+  //     },
+  //     moveComponentUp: function(index) {
+  //       var from = index;
+  //       var to = index - 1;
+  //       var element = this.components[from];
+  //       this.components.splice(from, 1);
+  //       this.components.splice(to, 0, element);
+  //     },
+  //     moveComponentDown: function(index) {
+  //       var from = index;
+  //       var to = index + 1;
+  //       var element = this.components[from];
+  //       this.components.splice(from, 1);
+  //       this.components.splice(to, 0, element);
+  //     }
+  //   }
+  // });
 });
