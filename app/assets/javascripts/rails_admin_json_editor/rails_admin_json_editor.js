@@ -35,23 +35,22 @@ $(document).on('rails_admin.dom_ready', function() {
         moveUp: function() {
           var from = this.index;
           var to = this.index - 1;
-          var element = this.$parent.result.components[from];
-          this.$parent.result.components.splice(from, 1);
-          this.$parent.result.components.splice(to, 0, element);
+          var element = this.$parent.components[from];
+          this.$parent.components.splice(from, 1);
+          this.$parent.components.splice(to, 0, element);
         },
 
         moveDown: function() {
           var from = this.index;
           var to = this.index + 1;
-          var element = this.$parent.result.components[from];
-          this.$parent.result.components.splice(from, 1);
-          this.$parent.result.components.splice(to, 0, element);
+          var element = this.$parent.components[from];
+          this.$parent.components.splice(from, 1);
+          this.$parent.components.splice(to, 0, element);
         },
 
         remove: function() {
-          console.log(this);
           if(confirm("Are you sure?")) {
-            this.$parent.result.components.$remove(this.index);
+            this.$parent.components.$remove(this.index);
           }
         },
 
@@ -59,9 +58,9 @@ $(document).on('rails_admin.dom_ready', function() {
           var el = event.target;
           var value = el.options[el.selectedIndex].getAttribute('data-json');
           var json = JSON.parse(value);
-          var clonedData = _.clone(this.$parent.result.components[index]);
+          var clonedData = _.clone(this.$parent.components[index]);
           clonedData.props[fieldName] = json;
-          this.$parent.result.components.$set(index, clonedData);
+          this.$parent.components.$set(index, clonedData);
         },
 
         pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
@@ -78,7 +77,7 @@ $(document).on('rails_admin.dom_ready', function() {
   vm = new Vue({
     el: '[ref=json-editor]',
     data: {
-      result: jsonResult,
+      components: jsonResult.components,
       componentTypes: jsonComponentTypes,
       showJson: true
     },
@@ -90,6 +89,11 @@ $(document).on('rails_admin.dom_ready', function() {
           type: type,
           props: {}
         });
+      }
+    },
+    computed: {
+      result: function() {
+        return { components: this.components };
       }
     },
     components: components
