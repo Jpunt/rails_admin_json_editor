@@ -76,8 +76,11 @@ module RailsAdmin
               @label = name.to_s.humanize
 
               if type == :list
-                @allowed_nested_component_types = options[:components] unless options[:components].nil?
-                @allowed_nested_component_types = [options[:component]] unless options[:component].nil?
+                if options[:components].nil? && options[:component].nil?
+                  raise "At least one component should be set for JsonEditor::Field with type => :list"
+                end
+
+                @allowed_nested_component_types = options[:components].nil? ? [options[:component]] : options[:components]
               end
             end
 
