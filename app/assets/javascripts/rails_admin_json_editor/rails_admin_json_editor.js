@@ -52,7 +52,7 @@ $(document).on('rails_admin.dom_ready', function() {
         },
 
         remove: function() {
-          if(confirm("Are you sure?")) {
+          if(_.values(this.component.props).length === 0 || confirm("Are you sure?")) {
             this.parentComponents.$remove(this.parentIndex);
           }
         },
