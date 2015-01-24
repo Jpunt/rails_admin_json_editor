@@ -15,12 +15,15 @@
             <button v-on="click: moveUp" type="button" class="btn btn-default {{ moveUpEnabled ? '' : 'disabled' }}">
               <i class="icon-circle-arrow-up"></i>
             </button>
+
             <button v-on="click: moveDown" type="button" class="btn btn-default {{ moveDownEnabled ? '' : 'disabled' }}">
               <i class="icon-circle-arrow-down"></i>
             </button>
+
             <button v-on="click: expanded = !expanded" type="button" class="btn btn-default">
               <i class="{{ expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
             </button>
+
             <button v-on="click:remove" type="button" class="btn btn-default">
               <i class="icon-remove"></i>
             </button>
@@ -44,11 +47,11 @@
                 <% end %>
 
                 <% if f.type == :picker %>
-                  <select v-on="change: onChangePicker($event, component, '<%= f.name %>')" class="form-control record-picker">
+                  <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
                     <option value=""></option>
                     <% f.picker_records.each do |record| %>
                       <option
-                        v-attr="selected: pickerOptionIsSelected(component, '<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
+                        v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
                         value="<%= record.send(f.picker_label) %>"
                         data-json="<%= record.to_json %>">
                           <%= record.send(f.picker_label) %>
@@ -58,22 +61,39 @@
                 <% end %>
 
                 <% if f.type == :list %>
-                  <% # TODO: DRY up with root-list/dropdown %>
-                  <div v-repeat="nested_component: component.props.components">
+                  <div v-repeat="nestedComponent: component.props.<%= f.name %>">
                     <div
-                      v-component="component-type-{{ nested_component.type }}"
-                      v-with="component: nested_component, parentComponents: component.props.components, parentIndex: $index">
+                      v-component="component-type-{{ nestedComponent.type }}"
+                      v-with="component: nestedComponent, parentComponents: component.props.<%= f.name %>, parentIndex: $index">
                     </div>
                   </div>
 
-                  <div class="dropdown pull-left">
-                    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Component toevoegen <b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                      <li v-repeat="componentType: $root.componentTypes">
-                        <a href="#" v-on="click: addComponent($event, component, componentType.type)">{{ componentType.label }}</a>
-                      </li>
-                    </ul>
-                  </div>
+                  <!-- Add nested component -- one type allowed -->
+                  <% if f.allowed_nested_component_types.count == 1 %>
+                    <a href="#"
+                      class="btn btn-info"
+                      v-repeat="componentType: $root.componentTypes"
+                      v-show="nestedComponentTypeIsAllowed(componentType.type, <%= f.allowed_nested_component_types.map { |nct| nct.to_s } %>)"
+                      v-on="click: addComponent($event, '<%= f.name %>', componentType.type)">
+                        Add {{ componentType.label | lowercase }}
+                    </a>
+                  <% end %>
+
+                  <!-- Add nested component -- multiple types allowed -->
+                  <% if f.allowed_nested_component_types.count > 1 %>
+                    <div class="dropdown">
+                      <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li v-repeat="componentType: $root.componentTypes">
+                          <a href="#"
+                            v-if="nestedComponentTypeIsAllowed(componentType.type, <%= f.allowed_nested_component_types.map { |nct| nct.to_s } %>)"
+                            v-on="click: addComponent($event, '<%= f.name %>', componentType.type)">
+                              {{ componentType.label }}
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  <% end %>
                 <% end %>
 
                 <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
@@ -92,7 +112,7 @@
 
   <!-- Dropdown to add new content -->
   <div class="dropdown pull-left">
-    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Component toevoegen <b class="caret"></b></a>
+    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
 
     <ul class="dropdown-menu">
       <li v-repeat="componentType: componentTypes">

@@ -46,8 +46,8 @@ module RailsAdmin
               @label = type.to_s.humanize
             end
 
-            def field(name, type)
-              field = Field.new(name, type)
+            def field(name, type, options = {})
+              field = Field.new(name, type, options)
 
               yield(field) if block_given?
 
@@ -68,13 +68,17 @@ module RailsAdmin
             attr_accessor :label, :help
             attr_accessor :picker_label
             attr_accessor :picker_records
-            attr_accessor :components
+            attr_accessor :allowed_nested_component_types
 
-            def initialize(name, type)
+            def initialize(name, type, options = {})
               @name = name
               @type = type
               @label = name.to_s.humanize
-              @components = [] if type == :list
+
+              if type == :list
+                @allowed_nested_component_types = options[:components] unless options[:components].nil?
+                @allowed_nested_component_types = [options[:component]] unless options[:component].nil?
+              end
             end
 
             def label(s = nil)
@@ -88,14 +92,6 @@ module RailsAdmin
             def setup_picker(label, records)
               @picker_label = label
               @picker_records = records
-            end
-
-            def component(type)
-              component = Component.new(type)
-
-              yield(component) if block_given?
-
-              @components << component
             end
           end
         end

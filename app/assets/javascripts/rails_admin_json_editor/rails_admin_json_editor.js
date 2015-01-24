@@ -16,9 +16,6 @@ $(document).on('rails_admin.dom_ready', function() {
     jsonResult = { components: [] };
   }
 
-  // Make sure we let Vue update the json-field, but do it here to prevent data-loss when js is disabled
-  $('[ref=json-textarea]').val('');
-
   // Setup dynamic component-type components
   var components = {};
   _.each(jsonComponentTypes, function(c) {
@@ -26,8 +23,6 @@ $(document).on('rails_admin.dom_ready', function() {
       template: '#template-component-type-' + c.type,
       data: function() {
         return {
-          type: null,
-          props: {},
           expanded: true
         };
       },
@@ -63,12 +58,12 @@ $(document).on('rails_admin.dom_ready', function() {
         },
 
         // TODO: DRY up with $root.addComponent
-        addComponent: function(event, component, type) {
+        addComponent: function(event, target, type) {
           event.preventDefault();
 
-          var clonedProps = _.clone(component.props);
-          if(!clonedProps.components) {
-            clonedProps.components = []
+          var clonedProps = _.clone(this.component.props);
+          if(!clonedProps[target]) {
+            clonedProps[target] = [];
           }
 
           var obj = {
@@ -76,25 +71,29 @@ $(document).on('rails_admin.dom_ready', function() {
             props: {}
           };
 
-          clonedProps.components.push(obj);
+          clonedProps[target].push(obj);
           this.parentComponents[this.parentIndex].props = clonedProps;
         },
 
-        onChangePicker: function(event, component, fieldName) {
+        onChangePicker: function(event, fieldName) {
           var el = event.target;
           var value = el.options[el.selectedIndex].getAttribute('data-json');
           var json = JSON.parse(value);
 
-          var clonedProps = _.clone(component.props);
+          var clonedProps = _.clone(this.component.props);
           clonedProps[fieldName] = json;
           this.parentComponents[this.parentIndex].props = clonedProps;
         },
 
-        pickerOptionIsSelected: function(component, fieldName, recordLabel, recordName) {
-          return component.props &&
-            component.props[fieldName] &&
-            component.props[fieldName][recordLabel] &&
-            component.props[fieldName][recordLabel] === recordName;
+        pickerOptionIsSelected: function(fieldName, recordLabel, recordName) {
+          return this.component.props &&
+            this.component.props[fieldName] &&
+            this.component.props[fieldName][recordLabel] &&
+            this.component.props[fieldName][recordLabel] === recordName;
+        },
+
+        nestedComponentTypeIsAllowed: function(componentType, allowedComponentTypes) {
+          return _.contains(allowedComponentTypes, componentType)
         }
       }
     };
