@@ -41,9 +41,9 @@ module RailsAdmin
             attr_accessor :label, :help
 
             def initialize(model)
-              @name = model.name.demodulize
+              @name = model.name.gsub("::","___")
               @fields = []
-              @label = @name.humanize
+              @label = model.name.demodulize.humanize
             end
 
             def field(name, type, options = {})
@@ -82,7 +82,7 @@ module RailsAdmin
                   raise "At least one model should be set for JsonEditor::Field with type => :list"
                 end
 
-                @allowed_nested_models = allowed.map { |m| m.name.demodulize }
+                @allowed_nested_models = allowed.map { |m| m.name.gsub("::","__") }
               end
             end
 
