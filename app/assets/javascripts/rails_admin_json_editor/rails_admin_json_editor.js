@@ -6,21 +6,19 @@ var vm;
 $(document).on('rails_admin.dom_ready', function() {
   // TODO: Make this possible for multiple instances
 
-  // Vue.config.debug = true
-
   // Get data
-  var jsonResult          = $('[ref=json-editor]').data('json-result');
-  var jsonComponentTypes  = $('[ref=json-editor]').data('json-component-types');
+  var jsonResult = $('[ref=json-editor]').data('json-result');
+  var jsonScheme = $('[ref=json-editor]').data('json-scheme');
 
   if(!jsonResult) {
     jsonResult = { components: [] };
   }
 
-  // Setup dynamic component-type components
+  // Setup templates for models
   var components = {};
-  _.each(jsonComponentTypes, function(c) {
-    components['component-type-' + c.type] = {
-      template: '#template-component-type-' + c.type,
+  _.each(jsonScheme.models, function(model) {
+    components['fields-for-' + model.name] = {
+      template: '#template-fields-for-' + model.name,
       data: function() {
         return {
           expanded: true
@@ -32,7 +30,7 @@ $(document).on('rails_admin.dom_ready', function() {
         },
         moveDownEnabled: function() {
           return this.parentIndex < this.parentComponents.length - 1;
-        }
+        },
       },
       methods: {
         moveUp: function() {
@@ -52,27 +50,27 @@ $(document).on('rails_admin.dom_ready', function() {
         },
 
         remove: function() {
-          if(_.values(this.component.props).length === 0 || confirm("Are you sure?")) {
+          if(_.values(this.component.properties).length === 0 || confirm("Are you sure?")) {
             this.parentComponents.$remove(this.parentIndex);
           }
         },
 
         // TODO: DRY up with $root.addComponent
-        addComponent: function(event, target, type) {
+        addComponent: function(event, target, model) {
           event.preventDefault();
 
-          var clonedProps = _.clone(this.component.props);
-          if(!clonedProps[target]) {
-            clonedProps[target] = [];
+          var clonedproperties = _.clone(this.component.properties);
+          if(!clonedproperties[target]) {
+            clonedproperties[target] = [];
           }
 
           var obj = {
-            type: type,
-            props: {}
+            model_name: model.name,
+            properties: {}
           };
 
-          clonedProps[target].push(obj);
-          this.parentComponents[this.parentIndex].props = clonedProps;
+          clonedproperties[target].push(obj);
+          this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
 
         onChangePicker: function(event, fieldName) {
@@ -80,20 +78,20 @@ $(document).on('rails_admin.dom_ready', function() {
           var value = el.options[el.selectedIndex].getAttribute('data-json');
           var json = JSON.parse(value);
 
-          var clonedProps = _.clone(this.component.props);
-          clonedProps[fieldName] = json;
-          this.parentComponents[this.parentIndex].props = clonedProps;
+          var clonedproperties = _.clone(this.component.properties);
+          clonedproperties[fieldName] = json;
+          this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
 
         pickerOptionIsSelected: function(fieldName, recordLabel, recordName) {
-          return this.component.props &&
-            this.component.props[fieldName] &&
-            this.component.props[fieldName][recordLabel] &&
-            this.component.props[fieldName][recordLabel] === recordName;
+          return this.component.properties &&
+            this.component.properties[fieldName] &&
+            this.component.properties[fieldName][recordLabel] &&
+            this.component.properties[fieldName][recordLabel] === recordName;
         },
 
-        nestedComponentTypeIsAllowed: function(componentType, allowedComponentTypes) {
-          return _.contains(allowedComponentTypes, componentType)
+        nestedModelIsAllowed: function(model, allowedModels) {
+          return _.contains(allowedModels, model.name)
         }
       }
     };
@@ -104,16 +102,17 @@ $(document).on('rails_admin.dom_ready', function() {
     el: '[ref=json-editor]',
     data: {
       components: jsonResult.components,
-      componentTypes: jsonComponentTypes,
+      scheme: jsonScheme,
       showJson: false
     },
     methods: {
-      addComponent: function(e, type) {
+      addComponent: function(e, model) {
+        console.log('addComponent', model);
         e.preventDefault();
 
         var obj = {
-          type: type,
-          props: {}
+          model_name: model.name,
+          properties: {}
         };
 
         this.components.push(obj);

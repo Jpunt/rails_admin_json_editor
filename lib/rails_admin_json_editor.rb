@@ -19,31 +19,31 @@ module RailsAdmin
             bindings[:view].render partial: "rails_admin_json_editor/main/form_json_editor", locals: {field: self, form: bindings[:form]}
           end
 
-          register_instance_option :components do
-            @components
+          register_instance_option :models do
+            @models
           end
 
-          def setup
-            @components = []
+          def schema
+            @models = []
             yield if block_given?
           end
 
-          def component(type)
-            component = Component.new(type)
+          def model(m)
+            model = Model.new(m)
 
-            yield(component) if block_given?
+            yield(model) if block_given?
 
-            @components << component
+            @models << model
           end
 
-          class Component
-            attr_accessor :type, :fields
+          class Model
+            attr_accessor :name, :fields
             attr_accessor :label, :help
 
-            def initialize(type)
-              @type = type
+            def initialize(model)
+              @name = model.name.demodulize
               @fields = []
-              @label = type.to_s.humanize
+              @label = @name.humanize
             end
 
             def field(name, type, options = {})
@@ -68,7 +68,7 @@ module RailsAdmin
             attr_accessor :label, :help
             attr_accessor :picker_label
             attr_accessor :picker_records
-            attr_accessor :allowed_nested_component_types
+            attr_accessor :allowed_nested_models
 
             def initialize(name, type, options = {})
               @name = name
@@ -76,11 +76,13 @@ module RailsAdmin
               @label = name.to_s.humanize
 
               if type == :list
-                if options[:components].nil? && options[:component].nil?
-                  raise "At least one component should be set for JsonEditor::Field with type => :list"
+                allowed = options[:models].nil? ? [options[:model]] : options[:models]
+
+                if allowed.nil?
+                  raise "At least one model should be set for JsonEditor::Field with type => :list"
                 end
 
-                @allowed_nested_component_types = options[:components].nil? ? [options[:component]] : options[:components]
+                @allowed_nested_models = allowed.map { |m| m.name.demodulize }
               end
             end
 

@@ -4,13 +4,14 @@
 <div ref="json-editor"
   class="json-editor"
   data-json-result='<%= raw(field.value.blank? ? '{ "components":[] }' : field.value) %>'
-  data-json-component-types='<%= raw field.components.to_json %>'>
+  data-json-scheme='{ "models":<%= raw field.models.to_json %> }'>
 
-  <% field.components.each do |component| %>
-    <script type="text/x-template" id="template-component-type-<%= component.type %>">
+  <% field.models.each do |model| %>
+    <script type="text/x-template" id="template-fields-for-<%= model.name %>">
       <div class="component">
         <legend>
-          <%= component.label %>
+          <%= model.label %>
+
           <div class="btn-group btn-group-sm pull-right">
             <button v-on="click: moveUp" type="button" class="btn btn-default {{ moveUpEnabled ? '' : 'disabled' }}">
               <i class="icon-circle-arrow-up"></i>
@@ -31,19 +32,19 @@
         </legend>
 
         <div v-show="expanded">
-          <%= content_tag :p, component.help, class: "help-block" unless component.help.nil? %>
+          <%= content_tag :p, model.help, class: "help-block" unless model.help.nil? %>
 
-          <% component.fields.each do |f| %>
+          <% model.fields.each do |f| %>
             <div class="control-group row">
               <label class="col-sm-2 control-label"><%= f.label %></label>
 
               <div class="controls col-sm-10">
                 <% if f.type == :string %>
-                  <input v-model="component.props.<%= f.name %>" type="text" class="form-control" />
+                  <input v-model="component.properties.<%= f.name %>" type="text" class="form-control" />
                 <% end %>
 
                 <% if f.type == :text %>
-                  <textarea v-model="component.props.<%= f.name %>" class="form-control"></textarea>
+                  <textarea v-model="component.properties.<%= f.name %>" class="form-control"></textarea>
                 <% end %>
 
                 <% if f.type == :picker %>
@@ -61,34 +62,34 @@
                 <% end %>
 
                 <% if f.type == :list %>
-                  <div v-repeat="nestedComponent: component.props.<%= f.name %>">
+                  <div v-repeat="nestedComponent: component.properties.<%= f.name %>">
                     <div
-                      v-component="component-type-{{ nestedComponent.type }}"
-                      v-with="component: nestedComponent, parentComponents: component.props.<%= f.name %>, parentIndex: $index">
+                      v-component="fields-for-{{ nestedComponent.model_name }}"
+                      v-with="component: nestedComponent, parentComponents: component.properties.<%= f.name %>, parentIndex: $index">
                     </div>
                   </div>
 
-                  <!-- Add nested component -- one type allowed -->
-                  <% if f.allowed_nested_component_types.count == 1 %>
+                  <!-- Add nested component -- one model allowed -->
+                  <% if f.allowed_nested_models.count == 1 %>
                     <a href="#"
                       class="btn btn-info"
-                      v-repeat="componentType: $root.componentTypes"
-                      v-show="nestedComponentTypeIsAllowed(componentType.type, <%= f.allowed_nested_component_types.map { |nct| nct.to_s } %>)"
-                      v-on="click: addComponent($event, '<%= f.name %>', componentType.type)">
-                        Add {{ componentType.label | lowercase }}
+                      v-repeat="model: $root.scheme.models"
+                      v-show="nestedModelIsAllowed(model, <%= f.allowed_nested_models.map { |nct| nct.to_s } %>)"
+                      v-on="click: addComponent($event, '<%= f.name %>', model)">
+                        Add {{ model.label | lowercase }}
                     </a>
                   <% end %>
 
-                  <!-- Add nested component -- multiple types allowed -->
-                  <% if f.allowed_nested_component_types.count > 1 %>
+                  <!-- Add nested component -- multiple models allowed -->
+                  <% if f.allowed_nested_models.count > 1 %>
                     <div class="dropdown">
                       <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
                       <ul class="dropdown-menu">
-                        <li v-repeat="componentType: $root.componentTypes">
+                        <li v-repeat="model: $root.scheme.models">
                           <a href="#"
-                            v-if="nestedComponentTypeIsAllowed(componentType.type, <%= f.allowed_nested_component_types.map { |nct| nct.to_s } %>)"
-                            v-on="click: addComponent($event, '<%= f.name %>', componentType.type)">
-                              {{ componentType.label }}
+                            v-if="nestedModelIsAllowed(model, <%= f.allowed_nested_models.map { |nct| nct.to_s } %>)"
+                            v-on="click: addComponent($event, '<%= f.name %>', model)">
+                              {{ model.label }}
                           </a>
                         </li>
                       </ul>
@@ -107,7 +108,7 @@
 
   <!-- List all components and their fields -->
   <div v-repeat="component: components">
-    <div v-component="component-type-{{ component.type }}" v-with="component: component, parentComponents: components, parentIndex: $index"></div>
+    <div v-component="fields-for-{{ component.model_name }}" v-with="component: component, parentComponents: components, parentIndex: $index"></div>
   </div>
 
   <!-- Dropdown to add new content -->
@@ -115,8 +116,8 @@
     <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
 
     <ul class="dropdown-menu">
-      <li v-repeat="componentType: componentTypes">
-        <a href="#" v-on="click: addComponent($event, componentType.type)">{{ componentType.label }}</a>
+      <li v-repeat="model: scheme.models">
+        <a href="#" v-on="click: addComponent($event, model)">{{ model.label }}</a>
       </li>
     </ul>
   </div>
