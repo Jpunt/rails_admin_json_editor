@@ -82,7 +82,7 @@ module RailsAdmin
                   raise "At least one model should be set for JsonEditor::Field with type => :list"
                 end
 
-                @allowed_nested_models = allowed.map { |m| m.name.gsub("::","__") }
+                @allowed_nested_models = allowed.map { |m| m.name.gsub("::","___") }
               end
             end
 
