@@ -47,6 +47,10 @@
                   <textarea v-model="component.properties.<%= f.name %>" class="form-control"></textarea>
                 <% end %>
 
+                <% if f.type == :boolean %>
+                  <input type="checkbox" v-model="component.properties.<%= f.name %>">
+                <% end %>
+
                 <% if f.type == :picker %>
                   <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
                     <option value=""></option>
