@@ -54,7 +54,12 @@
                 <% if f.type == :picker %>
                   <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
                     <option value=""></option>
-                    <% f.picker_records.each do |record| %>
+                    <%
+                      records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") {
+                        f.picker_model_name.constantize.send(:all)
+                      }
+                    %>
+                    <% records.each do |record| %>
                       <option
                         v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
                         value="<%= record.send(f.picker_label) %>"
@@ -74,24 +79,24 @@
                   </div>
 
                   <!-- Add nested component -- one model allowed -->
-                  <% if f.allowed_nested_models.count == 1 %>
+                  <% if f.list_models.count == 1 %>
                     <a href="#"
                       class="btn btn-info"
                       v-repeat="model: $root.scheme.models"
-                      v-show="nestedModelIsAllowed(model, <%= f.allowed_nested_models.map { |nct| nct.to_s } %>)"
+                      v-show="nestedModelIsAllowed(model, <%= f.list_models.map { |nct| nct.to_s } %>)"
                       v-on="click: addComponent($event, '<%= f.name %>', model)">
                         Add {{ model.label | lowercase }}
                     </a>
                   <% end %>
 
                   <!-- Add nested component -- multiple models allowed -->
-                  <% if f.allowed_nested_models.count > 1 %>
+                  <% if f.list_models.count > 1 %>
                     <div class="dropdown">
                       <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
                       <ul class="dropdown-menu">
                         <li v-repeat="model: $root.scheme.models">
                           <a href="#"
-                            v-if="nestedModelIsAllowed(model, <%= f.allowed_nested_models.map { |nct| nct.to_s } %>)"
+                            v-if="nestedModelIsAllowed(model, <%= f.list_models.map { |nct| nct.to_s } %>)"
                             v-on="click: addComponent($event, '<%= f.name %>', model)">
                               {{ model.label }}
                           </a>

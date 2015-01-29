@@ -64,26 +64,21 @@ module RailsAdmin
           end
 
           class Field
-            attr_accessor :name, :type
-            attr_accessor :label, :help
-            attr_accessor :picker_label
-            attr_accessor :picker_records
-            attr_accessor :allowed_nested_models
+            attr_accessor :name,
+                          :type
+
+            attr_accessor :label,
+                          :help
+
+            attr_accessor :picker_label,
+                          :picker_model_name
+
+            attr_accessor :list_models
 
             def initialize(name, type, options = {})
               @name = name
               @type = type
               @label = name.to_s.humanize
-
-              if type == :list
-                allowed = options[:models].nil? ? [options[:model]] : options[:models]
-
-                if allowed.nil?
-                  raise "At least one model should be set for JsonEditor::Field with type => :list"
-                end
-
-                @allowed_nested_models = allowed.map { |m| m.name.gsub("::","___") }
-              end
             end
 
             def label(s = nil)
@@ -94,9 +89,13 @@ module RailsAdmin
               if s.nil? then return @help else @help = s end
             end
 
-            def setup_picker(label, records)
-              @picker_label = label
-              @picker_records = records
+            def picker(options)
+              @picker_label = options[:label]
+              @picker_model_name = options[:model].class.name
+            end
+
+            def list(models)
+              @list_models = Array(models)
             end
           end
         end
