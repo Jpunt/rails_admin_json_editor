@@ -1,5 +1,6 @@
 //= require rails_admin_json_editor/vue.0.11.4
 //= require rails_admin_json_editor/lodash.2.4.1
+//= require rails_admin_json_editor/markdown
 
 var vm;
 
@@ -14,6 +15,10 @@ $(document).on('rails_admin.dom_ready', function() {
     jsonResult = { components: [] };
   }
 
+  Vue.filter('markdown', function(value) {
+    return markdown.toHTML(value);
+  });
+
   // Setup templates for models
   var components = {};
   _.each(jsonScheme.models, function(model) {
@@ -21,7 +26,8 @@ $(document).on('rails_admin.dom_ready', function() {
       template: '#template-fields-for-' + model.name,
       data: function() {
         return {
-          expanded: true
+          expanded: true,
+          showPreview: false
         };
       },
       computed: {

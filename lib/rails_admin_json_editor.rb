@@ -68,7 +68,8 @@ module RailsAdmin
                           :type
 
             attr_accessor :label,
-                          :help
+                          :help,
+                          :css_class
 
             attr_accessor :picker_label,
                           :picker_model_name
@@ -87,6 +88,10 @@ module RailsAdmin
 
             def help(s = nil)
               if s.nil? then return @help else @help = s end
+            end
+
+            def css_class(s = nil)
+              if s.nil? then return @css_class else @css_class = s end
             end
 
             def picker(options)

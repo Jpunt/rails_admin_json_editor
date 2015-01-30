@@ -11,4 +11,20 @@ body.rails_admin .form-horizontal.denser .json-editor {
   .btn-toggle-json {
     margin-left: 15px;
   }
+
+  .markdown-field {
+    position: relative;
+    button {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+    }
+  }
+
+  .markdown-preview {
+    margin-top: 5px;
+    background: #EEE;
+    padding: 10px;
+    border-radius:5px;
+  }
 }
