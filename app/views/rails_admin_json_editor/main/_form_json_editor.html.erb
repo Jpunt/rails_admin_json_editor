@@ -62,7 +62,7 @@
                 <% end %>
 
                 <% if f.type == :boolean %>
-                  <input type="checkbox" v-model="component.properties.<%= f.name %>">
+                  <input type="checkbox" v-model="component.properties.<%= f.name %>" class="form-control">
                 <% end %>
 
                 <% if f.type == :picker %>

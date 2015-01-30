@@ -4,7 +4,7 @@ body.rails_admin .form-horizontal.denser .json-editor {
     margin-bottom: 15px;
   }
 
-  .form-control {
+  .form-control:not([type="checkbox"]) {
     width: 90%;
   }
 
