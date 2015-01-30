@@ -79,24 +79,24 @@
                   </div>
 
                   <!-- Add nested component -- one model allowed -->
-                  <% if f.list_models.count == 1 %>
+                  <% if f.list_model_names.count == 1 %>
                     <a href="#"
                       class="btn btn-info"
                       v-repeat="model: $root.scheme.models"
-                      v-show="nestedModelIsAllowed(model, <%= f.list_models.map { |nct| nct.to_s } %>)"
+                      v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
                       v-on="click: addComponent($event, '<%= f.name %>', model)">
                         Add {{ model.label | lowercase }}
                     </a>
                   <% end %>
 
                   <!-- Add nested component -- multiple models allowed -->
-                  <% if f.list_models.count > 1 %>
+                  <% if f.list_model_names.count > 1 %>
                     <div class="dropdown">
                       <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
                       <ul class="dropdown-menu">
                         <li v-repeat="model: $root.scheme.models">
                           <a href="#"
-                            v-if="nestedModelIsAllowed(model, <%= f.list_models.map { |nct| nct.to_s } %>)"
+                            v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
                             v-on="click: addComponent($event, '<%= f.name %>', model)">
                               {{ model.label }}
                           </a>

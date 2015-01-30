@@ -73,7 +73,7 @@ module RailsAdmin
             attr_accessor :picker_label,
                           :picker_model_name
 
-            attr_accessor :list_models
+            attr_accessor :list_model_names
 
             def initialize(name, type, options = {})
               @name = name
@@ -91,11 +91,11 @@ module RailsAdmin
 
             def picker(options)
               @picker_label = options[:label]
-              @picker_model_name = options[:model].class.name
+              @picker_model_name = options[:model].name
             end
 
             def list(models)
-              @list_models = Array(models)
+              @list_model_names = Array(models).map { |m| m.name.gsub("::","___") }
             end
           end
         end

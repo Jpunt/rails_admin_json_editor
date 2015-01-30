@@ -91,7 +91,7 @@ $(document).on('rails_admin.dom_ready', function() {
         },
 
         nestedModelIsAllowed: function(model, allowedModels) {
-          return _.contains(allowedModels, model.name)
+          return _.contains(allowedModels, model.name);
         }
       }
     };
