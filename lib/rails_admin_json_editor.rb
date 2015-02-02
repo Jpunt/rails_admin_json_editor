@@ -74,7 +74,10 @@ module RailsAdmin
             attr_accessor :picker_label,
                           :picker_model_name
 
-            attr_accessor :list_model_names
+            attr_accessor :list_model_names,
+                          :list_max_length
+
+            attr_accessor :enum_options
 
             def initialize(name, type, options = {})
               @name = name
@@ -99,8 +102,13 @@ module RailsAdmin
               @picker_model_name = options[:model].name
             end
 
-            def list(models)
+            def list(models, options = {})
               @list_model_names = Array(models).map { |m| m.name.gsub("::","___") }
+              @list_max_length = options[:max_length]
+            end
+
+            def enum(options)
+              @enum_options = options
             end
           end
         end

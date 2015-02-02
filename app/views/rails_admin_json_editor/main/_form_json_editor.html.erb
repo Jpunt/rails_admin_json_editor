@@ -65,13 +65,17 @@
                   <input type="checkbox" v-model="component.properties.<%= f.name %>" class="form-control">
                 <% end %>
 
+                <% if f.type == :enum %>
+                  <%= select_tag(nil, options_for_select(f.enum_options), class: "form-control", "v-model" => "component.properties.#{f.name}") %>
+                <% end %>
+
                 <% if f.type == :picker %>
                   <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
                     <option value=""></option>
                     <%
-                      records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") {
+                      records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") do
                         f.picker_model_name.constantize.send(:all)
-                      }
+                      end
                     %>
                     <% records.each do |record| %>
                       <option
@@ -92,32 +96,34 @@
                     </div>
                   </div>
 
-                  <!-- Add nested component -- one model allowed -->
-                  <% if f.list_model_names.count == 1 %>
-                    <a href="#"
-                      class="btn btn-info"
-                      v-repeat="model: $root.scheme.models"
-                      v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
-                      v-on="click: addComponent($event, '<%= f.name %>', model)">
-                        Add {{ model.label | lowercase }}
-                    </a>
-                  <% end %>
+                  <div v-show="!component.properties.<%= f.name %> || component.properties.<%= f.name %>.length < <%= f.list_max_length.nil? ? 999999 : f.list_max_length %>">
+                    <!-- Add nested component -- one model allowed -->
+                    <% if f.list_model_names.count == 1 %>
+                      <a href="#"
+                        class="btn btn-info"
+                        v-repeat="model: $root.scheme.models"
+                        v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
+                        v-on="click: addComponent($event, '<%= f.name %>', model)">
+                          Add {{ model.label | lowercase }}
+                      </a>
+                    <% end %>
 
-                  <!-- Add nested component -- multiple models allowed -->
-                  <% if f.list_model_names.count > 1 %>
-                    <div class="dropdown">
-                      <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
-                      <ul class="dropdown-menu">
-                        <li v-repeat="model: $root.scheme.models">
-                          <a href="#"
-                            v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
-                            v-on="click: addComponent($event, '<%= f.name %>', model)">
-                              {{ model.label }}
-                          </a>
-                        </li>
-                      </ul>
-                    </div>
-                  <% end %>
+                    <!-- Add nested component -- multiple models allowed -->
+                    <% if f.list_model_names.count > 1 %>
+                      <div class="dropdown">
+                        <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                          <li v-repeat="model: $root.scheme.models">
+                            <a href="#"
+                              v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
+                              v-on="click: addComponent($event, '<%= f.name %>', model)">
+                                {{ model.label }}
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+                    <% end %>
+                  </div>
                 <% end %>
 
                 <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
