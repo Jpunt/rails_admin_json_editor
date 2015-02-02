@@ -16,7 +16,7 @@ $(document).on('rails_admin.dom_ready', function() {
   }
 
   Vue.filter('markdown', function(value) {
-    return markdown.toHTML(value);
+    return value ? markdown.toHTML(value) : '';
   });
 
   // Setup templates for models
