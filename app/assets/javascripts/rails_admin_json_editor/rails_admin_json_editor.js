@@ -1,3 +1,5 @@
+/*globals $, Vue, markdown, _*/
+
 //= require rails_admin_json_editor/vue.0.11.4
 //= require rails_admin_json_editor/lodash.2.4.1
 //= require rails_admin_json_editor/markdown
@@ -5,6 +7,8 @@
 var vm;
 
 $(document).on('rails_admin.dom_ready', function() {
+  'use strict';
+
   // TODO: Make this possible for multiple instances
 
   // Get data
@@ -113,7 +117,6 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     methods: {
       addComponent: function(e, model) {
-        console.log('addComponent', model);
         e.preventDefault();
 
         var obj = {

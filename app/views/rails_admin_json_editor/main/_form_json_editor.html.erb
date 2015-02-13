@@ -3,7 +3,7 @@
 
 <div ref="json-editor"
   class="json-editor"
-  data-json-result='<%= raw(field.value.blank? ? '{ "components":[] }' : field.value) %>'
+  data-json-result='<%= field.value.blank? ? '{ "components":[] }' : field.value %>'
   data-json-scheme='{ "models":<%= raw field.models.to_json %> }'>
 
   <% field.models.each do |model| %>
