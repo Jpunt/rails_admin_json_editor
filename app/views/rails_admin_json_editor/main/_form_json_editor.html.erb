@@ -74,7 +74,7 @@
                     <option value=""></option>
                     <%
                       records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") do
-                        f.picker_model_name.constantize.send(:all)
+                        f.picker_model_name.constantize.send(:all).order(f.picker_label)
                       end
                     %>
                     <% records.each do |record| %>
