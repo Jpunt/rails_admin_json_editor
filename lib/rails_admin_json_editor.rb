@@ -41,9 +41,9 @@ module RailsAdmin
             attr_accessor :label, :help
 
             def initialize(model)
-              @name = model.name.gsub("::","___")
+              @name = model.is_a?(::String) ? model : model.name.gsub("::", "___")
               @fields = []
-              @label = model.name.demodulize.humanize
+              @label = @name.demodulize.humanize
             end
 
             def field(name, type, options = {})
