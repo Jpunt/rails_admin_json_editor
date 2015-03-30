@@ -28,6 +28,14 @@ module RailsAdmin
             yield if block_given?
           end
 
+          def orderable(o = nil)
+            if o.nil? then return @orderable else @orderable = o end
+          end
+
+          def guids(o = nil)
+            if o.nil? then return @guids else @guids = o end
+          end
+
           def model(m)
             model = Model.new(m)
 

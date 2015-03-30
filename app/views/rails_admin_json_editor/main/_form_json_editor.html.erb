@@ -4,22 +4,26 @@
 <div ref="json-editor"
   class="json-editor"
   data-json-result='<%= field.value.blank? ? '{ "components":[] }' : field.value %>'
-  data-json-scheme='{ "models":<%= raw field.models.to_json %> }'>
+  data-json-scheme='{ "models":<%= raw field.models.to_json %> }'
+  data-enable-guids="<%= field.guids ? 'true' : 'false' %>" >
 
   <% field.models.each do |model| %>
     <script type="text/x-template" id="template-fields-for-<%= model.name %>">
       <div class="component">
         <legend>
           <%= model.label %>
+          {{ component.guid ? '(' + component.guid + ')' : null }}
 
           <div class="btn-group btn-group-sm pull-right">
-            <button v-on="click: moveUp" type="button" class="btn btn-default {{ moveUpEnabled ? '' : 'disabled' }}">
-              <i class="icon-circle-arrow-up"></i>
-            </button>
+            <% if field.orderable %>
+              <button v-on="click: moveUp" type="button" class="btn btn-default {{ moveUpEnabled ? '' : 'disabled' }}">
+                <i class="icon-circle-arrow-up"></i>
+              </button>
 
-            <button v-on="click: moveDown" type="button" class="btn btn-default {{ moveDownEnabled ? '' : 'disabled' }}">
-              <i class="icon-circle-arrow-down"></i>
-            </button>
+              <button v-on="click: moveDown" type="button" class="btn btn-default {{ moveDownEnabled ? '' : 'disabled' }}">
+                <i class="icon-circle-arrow-down"></i>
+              </button>
+            <% end %>
 
             <button v-on="click: expanded = !expanded" type="button" class="btn btn-default">
               <i class="{{ expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>

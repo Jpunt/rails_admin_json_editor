@@ -14,6 +14,7 @@ $(document).on('rails_admin.dom_ready', function() {
   // Get data
   var jsonResult = $('[ref=json-editor]').data('json-result');
   var jsonScheme = $('[ref=json-editor]').data('json-scheme');
+  var enableGuids = $('[ref=json-editor]').data('enable-guids');
 
   if(!jsonResult) {
     jsonResult = { components: [] };
@@ -79,6 +80,10 @@ $(document).on('rails_admin.dom_ready', function() {
             properties: {}
           };
 
+          if(enableGuids) {
+            obj.guid = guid();
+          }
+
           clonedproperties[target].push(obj);
           this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
@@ -124,6 +129,11 @@ $(document).on('rails_admin.dom_ready', function() {
           properties: {}
         };
 
+        console.log('enableGuids', enableGuids);
+        if(enableGuids) {
+          obj.guid = guid();
+        }
+
         this.components.push(obj);
       }
     },
@@ -135,3 +145,13 @@ $(document).on('rails_admin.dom_ready', function() {
     components: components
   });
 });
+
+function guid() {
+  'use strict';
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4();
+}
