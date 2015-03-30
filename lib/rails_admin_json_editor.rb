@@ -12,6 +12,10 @@ module RailsAdmin
     module Fields
       module Types
         class JsonEditor < RailsAdmin::Config::Fields::Types::Text
+          def self.parse_model_name m
+            m.is_a?(::String) ? m : m.name.gsub("::", "___")
+          end
+
           # Register field type for the type loader
           RailsAdmin::Config::Fields::Types.register(self)
 
@@ -49,7 +53,7 @@ module RailsAdmin
             attr_accessor :label, :help
 
             def initialize(model)
-              @name = model.is_a?(::String) ? model : model.name.gsub("::", "___")
+              @name = JsonEditor.parse_model_name(model)
               @fields = []
               @label = @name.demodulize.humanize
             end
@@ -111,7 +115,7 @@ module RailsAdmin
             end
 
             def list(models, options = {})
-              @list_model_names = Array(models).map { |m| m.name.gsub("::","___") }
+              @list_model_names = Array(models).map { |m| JsonEditor.parse_model_name(m) }
               @list_max_length = options[:max_length]
             end
 
