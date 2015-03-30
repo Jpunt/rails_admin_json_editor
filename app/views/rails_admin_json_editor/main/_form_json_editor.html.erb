@@ -12,7 +12,7 @@
       <div class="component">
         <legend>
           <%= model.label %>
-          {{ component.guid ? '(' + component.guid + ')' : null }}
+          {{ component.guid ? ' - ' + component.guid : null }}
 
           <div class="btn-group btn-group-sm pull-right">
             <% if field.orderable %>
