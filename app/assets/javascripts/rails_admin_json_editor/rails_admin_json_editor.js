@@ -80,10 +80,6 @@ $(document).on('rails_admin.dom_ready', function() {
             properties: {}
           };
 
-          if(enableGuids) {
-            obj.guid = guid();
-          }
-
           clonedproperties[target].push(obj);
           this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
