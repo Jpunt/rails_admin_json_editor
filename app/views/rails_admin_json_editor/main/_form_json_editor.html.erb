@@ -11,7 +11,8 @@
     <script type="text/x-template" id="template-fields-for-<%= model.name %>">
       <div class="component">
         <legend>
-          <%= model.label %>
+          <span class="model-label"><%= model.label %></span>
+          <pre class="guid" v-text="component.guid"></pre>
 
           <div class="btn-group btn-group-sm pull-right">
             <% if field.orderable %>
@@ -36,13 +37,6 @@
 
         <div v-show="expanded">
           <%= content_tag :p, model.help, class: "help-block" unless model.help.nil? %>
-
-          <div v-if="component.guid" class="control-group row">
-            <label class="col-sm-2 control-label">Identifier</label>
-            <div class="col-sm-10">
-              <pre class="guid" v-text="component.model_name + ' | ' + component.guid"></pre>
-            </div>
-          </div>
 
           <% model.fields.each do |f| %>
             <div class="control-group row <%= f.css_class %>">

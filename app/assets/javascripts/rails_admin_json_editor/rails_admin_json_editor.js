@@ -125,7 +125,6 @@ $(document).on('rails_admin.dom_ready', function() {
           properties: {}
         };
 
-        console.log('enableGuids', enableGuids);
         if(enableGuids) {
           obj.guid = guid();
         }
@@ -135,7 +134,9 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     computed: {
       result: function() {
-        return { components: this.components };
+        var result = { components: this.components };
+        $(this.$el).trigger('json-editor:changed', result);
+        return result;
       }
     },
     components: components
