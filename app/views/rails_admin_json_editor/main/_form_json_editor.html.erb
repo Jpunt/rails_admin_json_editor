@@ -156,7 +156,7 @@
 
     <ul class="dropdown-menu">
       <li v-repeat="model: scheme.models">
-        <a href="#" v-on="click: addComponent($event, model)">{{ model.label }}</a>
+        <a href="#" v-if="!model.hide_in_root" v-on="click: addComponent($event, model)">{{ model.label }}</a>
       </li>
     </ul>
   </div>

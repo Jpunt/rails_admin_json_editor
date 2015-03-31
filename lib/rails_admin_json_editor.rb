@@ -51,6 +51,7 @@ module RailsAdmin
           class Model
             attr_accessor :name, :fields
             attr_accessor :label, :help
+            attr_accessor :hide_in_root
 
             def initialize(model)
               @name = JsonEditor.parse_model_name(model)
@@ -72,6 +73,10 @@ module RailsAdmin
 
             def help(s = nil)
               if s.nil? then return @help else @help = s end
+            end
+
+            def hide_in_root(b = nil)
+              if b.nil? then return @hide_in_root else @hide_in_root = b end
             end
           end
 
