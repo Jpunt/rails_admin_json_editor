@@ -134,9 +134,9 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     computed: {
       result: function() {
-        var result = JSON.stringify({ components: this.components });
+        var result = { components: this.components };
         $(this.$el).trigger('json-editor:changed', result);
-        return result;
+        return JSON.stringify(result);
       }
     },
     components: components
