@@ -83,7 +83,7 @@
                     %>
                     <% records.each do |record| %>
                       <option
-                        v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label) %>')"
+                        v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label).gsub(/['"]/, '') %>')"
                         value="<%= record.send(f.picker_label) %>"
                         data-json="<%= record.to_json %>">
                           <%= record.send(f.picker_label) %>
@@ -165,7 +165,7 @@
 
     <div v-show="showJson">
       <%= form.text_area field.name,
-        'v-model' => 'result | json',
+        'v-model' => 'result',
         value: field.value,
         ref: 'json-textarea',
         style: 'width:100%; height:400px; margin-top:20px' %>

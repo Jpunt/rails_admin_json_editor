@@ -98,7 +98,7 @@ $(document).on('rails_admin.dom_ready', function() {
           return this.component.properties &&
             this.component.properties[fieldName] &&
             this.component.properties[fieldName][recordLabel] &&
-            this.component.properties[fieldName][recordLabel] === recordName;
+            this.component.properties[fieldName][recordLabel].replace(/["']/g, "") === recordName.replace(/["']/g, "");
         },
 
         nestedModelIsAllowed: function(model, allowedModels) {
@@ -134,7 +134,7 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     computed: {
       result: function() {
-        var result = { components: this.components };
+        var result = JSON.stringify({ components: this.components });
         $(this.$el).trigger('json-editor:changed', result);
         return result;
       }
