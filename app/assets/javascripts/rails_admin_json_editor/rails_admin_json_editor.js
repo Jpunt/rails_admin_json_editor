@@ -86,21 +86,44 @@ $(document).on('rails_admin.dom_ready', function() {
           this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
 
-        onChangePicker: function(event, fieldName) {
-          var el = event.target;
-          var value = el.options[el.selectedIndex].getAttribute('data-json');
-          var json = JSON.parse(value);
+        showPickerModal: function(fieldName, modalLink) {
+          var remoteForm = window.jsonEditorRemoteForm;
+          var $modal = remoteForm.getModal();
+          var self = this;
 
-          var clonedproperties = _.clone(this.component.properties);
-          clonedproperties[fieldName] = json;
-          this.parentComponents[this.parentIndex].properties = clonedproperties;
+          remoteForm.init(modalLink)
+            // Inject form-DOM into modal
+            .then(function(form) {
+              $modal.find('.modal-body').html(form);
+            })
+
+            // Wait for results from modal
+            .then(function() {
+              return remoteForm.setupForm($modal);
+            })
+
+            // Result received
+            .then(function(json) {
+              var clonedproperties = _.clone(self.component.properties);
+              clonedproperties[fieldName] = json;
+              self.parentComponents[self.parentIndex].properties = clonedproperties;
+            })
+
+            // Cleanup
+            .always(function() {
+              setTimeout(function() {
+                $('.modal-backdrop, #modal').remove();
+              }, 500);
+            });
         },
 
-        pickerOptionIsSelected: function(fieldName, recordLabel, recordName) {
-          return this.component.properties &&
-            this.component.properties[fieldName] &&
-            this.component.properties[fieldName][recordLabel] &&
-            this.component.properties[fieldName][recordLabel].replace(/["']/g, "") === recordName.replace(/["']/g, "");
+        pickerResult: function(fieldName) {
+          console.log('pickerResult', fieldName, this.component);
+          return this.component.properties[fieldName];
+        },
+
+        removePickerResult: function(fieldName) {
+          this.component.properties[fieldName] = null;
         },
 
         nestedModelIsAllowed: function(model, allowedModels) {

@@ -13,6 +13,7 @@
       v-repeat="model: $root.scheme.models"
       v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
       v-on="click: addComponent($event, '<%= f.name %>', model)">
+        <i class="icon-plus icon-white"></i>
         Add {{ model.label | lowercase }}
     </a>
   <% end %>
@@ -26,6 +27,7 @@
           <a href="#"
             v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
             v-on="click: addComponent($event, '<%= f.name %>', model)">
+              <i class="icon-plus icon-white"></i>
               {{ model.label }}
           </a>
         </li>

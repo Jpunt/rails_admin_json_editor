@@ -1,3 +1,4 @@
+<% if false %>
 <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
   <option value=""></option>
   <%
@@ -14,3 +15,24 @@
     </option>
   <% end %>
 </select>
+<% end %>
+
+
+<div class="picker">
+  <div v-if="pickerResult('<%= f.name %>')">
+    <div v-text="pickerResult('<%= f.name %>') | json"></div>
+
+    <a v-on="click: removePickerResult('<%= f.name %>')" class="btn btn-info">
+      <i class="icon-remove icon-white"></i>
+      Remove
+    </a>
+  </div>
+
+  <div v-if="!pickerResult('<%= f.name %>')">
+    <!-- TODO: proper modal-link -->
+    <a v-on="click: showPickerModal('<%= f.name %>', '/cms/image/new?modal=true')" class="btn btn-info create">
+      <i class="icon-plus icon-white"></i>
+      Create
+    </a>
+  </div>
+</div>
