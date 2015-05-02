@@ -1,41 +1,24 @@
-<% if false %>
-<select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
-  <option value=""></option>
-  <%
-    records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") do
-      f.picker_model_name.constantize.send(:all).order(f.picker_label)
-    end
-  %>
-  <% records.each do |record| %>
-    <option
-      v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label).gsub(/['"]/, '') %>')"
-      value="<%= record.send(f.picker_label) %>"
-      data-json="<%= record.to_json %>">
-        <%= record.send(f.picker_label) %>
-    </option>
-  <% end %>
-</select>
-<% end %>
-
 <div class="picker">
-  <div v-if="pickerResult('<%= f.name %>')">
-    <% if f.picker_preview_field.nil? %>
-      <pre v-text="pickerResult('<%= f.name %>') | json"></pre>
-    <% else %>
+  <div v-if="pickerResult('<%= f.name %>')" class="picker-preview">
+    <% if !f.picker_preview_image_field.nil? %>
+      <img v-attr="src: pickerResult('<%= f.name %>').<%= f.picker_preview_image_field %>" />
+    <% elsif !f.picker_preview_field.nil? %>
       <p v-text="pickerResult('<%= f.name %>').<%= f.picker_preview_field %>"></p>
+    <% else %>
+      <pre v-text="pickerResult('<%= f.name %>') | json"></pre>
     <% end %>
 
-    <a v-on="click: removePickerResult('<%= f.name %>')" class="btn btn-info">
+    <a v-on="click: removePickerResult('<%= f.name %>')" class="btn btn-info remove">
       <i class="icon-remove icon-white"></i>
       Remove
     </a>
   </div>
 
   <div v-if="!pickerResult('<%= f.name %>')">
-    <!-- TODO: proper links -->
-    <a v-on="click: showPickerModal('<%= f.name %>', '/cms/image/new?modal=true')" class="btn btn-info create">
+    <% url = rails_admin.new_path(f.picker_model_name) + '?modal=true' %>
+    <a v-on="click: showPickerModal('<%= f.name %>', '<%= url %>')" class="btn btn-info create">
       <i class="icon-plus icon-white"></i>
-      Create
+      Add
     </a>
   </div>
 </div>

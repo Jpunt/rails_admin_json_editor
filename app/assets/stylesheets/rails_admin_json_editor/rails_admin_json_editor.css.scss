@@ -35,4 +35,22 @@ body.rails_admin .form-horizontal.denser .json-editor {
     padding: 0.1em 0.5em;
     margin: 0 0 -2px 5px;
   }
+
+  .picker-preview {
+    img {
+      margin-bottom: 5px;
+    }
+
+    p {
+      margin-top: 8px;
+      margin-right: 12px;
+      display: inline-block;
+      font-size: 14px;
+    }
+
+    .btn.remove {
+      display: inline-block;
+      vertical-align: top;
+    }
+  }
 }
