@@ -1,8 +1,10 @@
 /*globals $, Vue, markdown, _*/
 
-//= require rails_admin_json_editor/vue.0.11.4
-//= require rails_admin_json_editor/lodash.2.4.1
-//= require rails_admin_json_editor/markdown
+//= require rails_admin_json_editor/lib/vue.0.11.4
+//= require rails_admin_json_editor/lib/lodash.2.4.1
+//= require rails_admin_json_editor/lib/markdown
+
+//= require rails_admin_json_editor/ra.remoteForm.custom
 
 var vm;
 
