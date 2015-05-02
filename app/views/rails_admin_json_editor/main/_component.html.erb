@@ -33,31 +33,31 @@
 
         <div class="controls col-sm-10">
           <% if f.type == :string %>
-            <%= render 'rails_admin_json_editor/main/fields/string', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/string', f: f %>
           <% end %>
 
           <% if f.type == :text %>
-            <%= render 'rails_admin_json_editor/main/fields/text', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/text', f: f %>
           <% end %>
 
           <% if f.type == :markdown %>
-            <%= render 'rails_admin_json_editor/main/fields/markdown', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/markdown', f: f %>
           <% end %>
 
           <% if f.type == :boolean %>
-            <%= render 'rails_admin_json_editor/main/fields/boolean', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/boolean', f: f %>
           <% end %>
 
           <% if f.type == :enum %>
-            <%= render 'rails_admin_json_editor/main/fields/enum', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/enum', f: f %>
           <% end %>
 
           <% if f.type == :picker %>
-            <%= render 'rails_admin_json_editor/main/fields/picker', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/picker', f: f %>
           <% end %>
 
           <% if f.type == :list %>
-            <%= render 'rails_admin_json_editor/main/fields/list', f: f %>
+            <%= render 'rails_admin_json_editor/main/component_fields/list', f: f %>
           <% end %>
 
           <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
