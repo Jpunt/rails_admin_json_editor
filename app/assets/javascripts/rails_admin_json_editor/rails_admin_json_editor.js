@@ -102,7 +102,13 @@ $(document).on('rails_admin.dom_ready', function() {
               return remoteForm.setupForm($modal);
             })
 
-            // Result received
+            // Fetch full JSON
+            .then(function(minimalJson) {
+              var url = modalLink.replace('new?modal=true', minimalJson.id) + '.json';
+              return $.get(url);
+            })
+
+            // Full result received
             .then(function(json) {
               var clonedproperties = _.clone(self.component.properties);
               clonedproperties[fieldName] = json;
@@ -118,7 +124,6 @@ $(document).on('rails_admin.dom_ready', function() {
         },
 
         pickerResult: function(fieldName) {
-          console.log('pickerResult', fieldName, this.component);
           return this.component.properties[fieldName];
         },
 

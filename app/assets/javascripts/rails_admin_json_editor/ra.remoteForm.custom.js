@@ -55,7 +55,6 @@
           deferred.reject(data.responseText);
         } else {
           var json = $.parseJSON(data.responseText);
-          console.log('json:', json);
           $modal.modal('hide');
           deferred.resolve(json);
         }
