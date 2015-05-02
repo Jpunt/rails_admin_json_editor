@@ -1,0 +1,11 @@
+<div class="markdown-field">
+  <textarea v-model="component.properties.<%= f.name %>" class="form-control" rows="10"></textarea>
+
+  <button v-on="click: showPreview = !showPreview" type="button" class="btn btn-default">
+    <i class="icon-eye-open"></i>
+  </button>
+</div>
+
+<div class="markdown-preview" v-show="showPreview">
+  <div v-html="component.properties.<%= f.name %> | markdown"></div>
+</div>

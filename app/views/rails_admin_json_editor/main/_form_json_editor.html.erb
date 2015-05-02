@@ -44,90 +44,31 @@
 
               <div class="controls col-sm-10">
                 <% if f.type == :string %>
-                  <input v-model="component.properties.<%= f.name %>" type="text" class="form-control" />
+                  <%= render 'rails_admin_json_editor/main/fields/string', f: f %>
                 <% end %>
 
                 <% if f.type == :text %>
-                  <textarea v-model="component.properties.<%= f.name %>" class="form-control"></textarea>
+                  <%= render 'rails_admin_json_editor/main/fields/text', f: f %>
                 <% end %>
 
                 <% if f.type == :markdown %>
-                  <div class="markdown-field">
-                    <textarea v-model="component.properties.<%= f.name %>" class="form-control" rows="10"></textarea>
-
-                    <button v-on="click: showPreview = !showPreview" type="button" class="btn btn-default">
-                      <i class="icon-eye-open"></i>
-                    </button>
-                  </div>
-
-                  <div class="markdown-preview" v-show="showPreview">
-                    <div v-html="component.properties.<%= f.name %> | markdown"></div>
-                  </div>
+                  <%= render 'rails_admin_json_editor/main/fields/markdown', f: f %>
                 <% end %>
 
                 <% if f.type == :boolean %>
-                  <input type="checkbox" v-model="component.properties.<%= f.name %>" class="form-control">
+                  <%= render 'rails_admin_json_editor/main/fields/boolean', f: f %>
                 <% end %>
 
                 <% if f.type == :enum %>
-                  <%= select_tag(nil, options_for_select(f.enum_options), include_blank: true, class: "form-control", "v-model" => "component.properties.#{f.name}") %>
+                  <%= render 'rails_admin_json_editor/main/fields/enum', f: f %>
                 <% end %>
 
                 <% if f.type == :picker %>
-                  <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
-                    <option value=""></option>
-                    <%
-                      records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") do
-                        f.picker_model_name.constantize.send(:all).order(f.picker_label)
-                      end
-                    %>
-                    <% records.each do |record| %>
-                      <option
-                        v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label).gsub(/['"]/, '') %>')"
-                        value="<%= record.send(f.picker_label) %>"
-                        data-json="<%= record.to_json %>">
-                          <%= record.send(f.picker_label) %>
-                      </option>
-                    <% end %>
-                  </select>
+                  <%= render 'rails_admin_json_editor/main/fields/picker', f: f %>
                 <% end %>
 
                 <% if f.type == :list %>
-                  <div v-repeat="nestedComponent: component.properties.<%= f.name %>">
-                    <div
-                      v-component="fields-for-{{ nestedComponent.model_name }}"
-                      v-with="component: nestedComponent, parentComponents: component.properties.<%= f.name %>, parentIndex: $index">
-                    </div>
-                  </div>
-
-                  <div v-show="!component.properties.<%= f.name %> || component.properties.<%= f.name %>.length < <%= f.list_max_length.nil? ? 999999 : f.list_max_length %>">
-                    <!-- Add nested component -- one model allowed -->
-                    <% if f.list_model_names.count == 1 %>
-                      <a href="#"
-                        class="btn btn-info"
-                        v-repeat="model: $root.scheme.models"
-                        v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
-                        v-on="click: addComponent($event, '<%= f.name %>', model)">
-                          Add {{ model.label | lowercase }}
-                      </a>
-                    <% end %>
-
-                    <!-- Add nested component -- multiple models allowed -->
-                    <% if f.list_model_names.count > 1 %>
-                      <div class="dropdown">
-                        <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                          <li v-repeat="model: $root.scheme.models">
-                            <a href="#"
-                              v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
-                              v-on="click: addComponent($event, '<%= f.name %>', model)">
-                                {{ model.label }}
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    <% end %>
-                  </div>
+                  <%= render 'rails_admin_json_editor/main/fields/list', f: f %>
                 <% end %>
 
                 <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>

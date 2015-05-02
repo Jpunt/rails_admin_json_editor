@@ -1,0 +1,16 @@
+<select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
+  <option value=""></option>
+  <%
+    records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") do
+      f.picker_model_name.constantize.send(:all).order(f.picker_label)
+    end
+  %>
+  <% records.each do |record| %>
+    <option
+      v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label).gsub(/['"]/, '') %>')"
+      value="<%= record.send(f.picker_label) %>"
+      data-json="<%= record.to_json %>">
+        <%= record.send(f.picker_label) %>
+    </option>
+  <% end %>
+</select>
