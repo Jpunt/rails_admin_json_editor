@@ -20,7 +20,10 @@
 
   <!-- Dropdown to add new content -->
   <div class="dropdown pull-left">
-    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
+    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">
+      <%= I18n.t 'admin.json_editor.add', field_name: 'Component' %>
+      <b class="caret"></b>
+    </a>
 
     <ul class="dropdown-menu">
       <li v-repeat="model: scheme.models">
