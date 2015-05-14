@@ -88,8 +88,9 @@ module RailsAdmin
                           :help,
                           :css_class
 
-            attr_accessor :picker_label,
-                          :picker_model_name
+            attr_accessor :picker_model_name,
+                          :picker_preview_field,
+                          :picker_preview_image_field
 
             attr_accessor :list_model_names,
                           :list_max_length
@@ -115,8 +116,9 @@ module RailsAdmin
             end
 
             def picker(options)
-              @picker_label = options[:label]
               @picker_model_name = options[:model].name
+              @picker_preview_field = options[:preview_field]
+              @picker_preview_image_field = options[:preview_image_field]
             end
 
             def list(models, options = {})

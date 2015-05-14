@@ -1,0 +1,35 @@
+<div class="picker">
+  <div v-if="pickerResult('<%= f.name %>')" class="picker-preview">
+    <% if !f.picker_preview_image_field.nil? %>
+      <img v-attr="src: pickerResult('<%= f.name %>').<%= f.picker_preview_image_field %>" />
+    <% elsif !f.picker_preview_field.nil? %>
+      <p v-text="pickerResult('<%= f.name %>').<%= f.picker_preview_field %>"></p>
+    <% else %>
+      <pre v-text="pickerResult('<%= f.name %>') | json"></pre>
+    <% end %>
+
+    <a v-on="click: removePickerResult('<%= f.name %>')" class="btn btn-info remove">
+      <i class="icon-remove icon-white"></i>
+      <%= I18n.t('admin.json_editor.remove', field_name: f.picker_model_name.constantize.send(:model_name).human) %>
+    </a>
+  </div>
+
+  <div v-if="!pickerResult('<%= f.name %>')">
+    <%
+      base_url = rails_admin.index_path(f.picker_model_name)
+    %>
+
+    <select v-on="change: onChangePickerSelect($event, '<%= f.name %>', '<%= base_url %>')"
+      data-filteringselect="true"
+      data-remote-source="<%= base_url %>?compact=true"
+      placeholder="Search"
+      class="not-initialized-filtering-select" >
+        <option value=""></option>
+    </select>
+
+    <a v-on="click: showPickerModal($event, '<%= f.name %>', '<%= base_url %>')" class="btn btn-info create">
+      <i class="icon-plus icon-white"></i>
+      <%= I18n.t('admin.json_editor.add', field_name: f.picker_model_name.constantize.send(:model_name).human) %>
+    </a>
+  </div>
+</div>

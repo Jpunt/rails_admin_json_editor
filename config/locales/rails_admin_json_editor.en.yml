@@ -1,0 +1,5 @@
+en:
+  admin:
+    json_editor:
+      add: 'Add %{field_name}'
+      remove: 'Remove %{field_name}'

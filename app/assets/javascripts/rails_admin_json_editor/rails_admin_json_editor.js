@@ -1,8 +1,11 @@
 /*globals $, Vue, markdown, _*/
 
-//= require rails_admin_json_editor/vue.0.11.4
-//= require rails_admin_json_editor/lodash.2.4.1
-//= require rails_admin_json_editor/markdown
+//= require rails_admin_json_editor/lib/vue.0.11.4
+//= require rails_admin_json_editor/lib/lodash.2.4.1
+//= require rails_admin_json_editor/lib/markdown
+
+//= require rails_admin_json_editor/ra.remoteForm.custom
+//= require rails_admin_json_editor/ra.filtering-select.custom
 
 var vm;
 
@@ -84,21 +87,61 @@ $(document).on('rails_admin.dom_ready', function() {
           this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
 
-        onChangePicker: function(event, fieldName) {
-          var el = event.target;
-          var value = el.options[el.selectedIndex].getAttribute('data-json');
-          var json = JSON.parse(value);
+        showPickerModal: function(e, fieldName, baseUrl) {
+          var remoteForm = window.jsonEditorRemoteForm;
+          var $modal = remoteForm.getModal();
+          var self = this;
 
-          var clonedproperties = _.clone(this.component.properties);
-          clonedproperties[fieldName] = json;
-          this.parentComponents[this.parentIndex].properties = clonedproperties;
+          remoteForm.init(baseUrl + '/new?modal=true')
+            // Inject form-DOM into modal
+            .then(function(form) {
+              $modal.find('.modal-body').html(form);
+            })
+
+            // Wait for results from modal
+            .then(function() {
+              return remoteForm.setupForm($modal);
+            })
+
+            // Fetch full JSON
+            .then(function(minimalJson) {
+              var url = baseUrl + '/' + minimalJson.id + '.json';
+              return $.get(url);
+            })
+
+            // Full result received
+            .then(function(json) {
+              var clonedproperties = _.clone(self.component.properties);
+              clonedproperties[fieldName] = json;
+              self.parentComponents[self.parentIndex].properties = clonedproperties;
+            })
+
+            // Cleanup
+            .always(function() {
+              setTimeout(function() {
+                $('.modal-backdrop, #modal').remove();
+              }, 500);
+            });
         },
 
-        pickerOptionIsSelected: function(fieldName, recordLabel, recordName) {
-          return this.component.properties &&
-            this.component.properties[fieldName] &&
-            this.component.properties[fieldName][recordLabel] &&
-            this.component.properties[fieldName][recordLabel].replace(/["']/g, "") === recordName.replace(/["']/g, "");
+        onChangePickerSelect: function(e, fieldName, baseUrl) {
+          var self = this;
+          var id = $(e.currentTarget).val();
+          var url = baseUrl + '/' + id + '.json';
+
+          $.get(url).then(function(json) {
+            var clonedproperties = _.clone(self.component.properties);
+            clonedproperties[fieldName] = json;
+            self.parentComponents[self.parentIndex].properties = clonedproperties;
+          });
+        },
+
+        pickerResult: function(fieldName) {
+          return this.component.properties[fieldName];
+        },
+
+        removePickerResult: function(fieldName) {
+          this.component.properties[fieldName] = null;
         },
 
         nestedModelIsAllowed: function(model, allowedModels) {
@@ -134,6 +177,10 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     computed: {
       result: function() {
+        // Hack in jquery filtering select
+        $('.not-initialized-filtering-select').jsonEditorFilteringSelect();
+
+        // Format result
         var result = { components: this.components };
         $(this.$el).trigger('json-editor:changed', result);
         return JSON.stringify(result);

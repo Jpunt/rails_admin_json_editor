@@ -1,0 +1,37 @@
+<div v-repeat="nestedComponent: component.properties.<%= f.name %>">
+  <div
+    v-component="fields-for-{{ nestedComponent.model_name }}"
+    v-with="component: nestedComponent, parentComponents: component.properties.<%= f.name %>, parentIndex: $index">
+  </div>
+</div>
+
+<div v-show="!component.properties.<%= f.name %> || component.properties.<%= f.name %>.length < <%= f.list_max_length.nil? ? 999999 : f.list_max_length %>">
+  <!-- Add nested component, one model allowed -->
+  <% if f.list_model_names.count == 1 %>
+    <a href="#"
+      class="btn btn-info"
+      v-repeat="model: $root.scheme.models"
+      v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
+      v-on="click: addComponent($event, '<%= f.name %>', model)">
+        <i class="icon-plus icon-white"></i>
+        Add {{ model.label | lowercase }}
+    </a>
+  <% end %>
+
+  <!-- Add nested component, multiple models allowed -->
+  <% if f.list_model_names.count > 1 %>
+    <div class="dropdown">
+      <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
+      <ul class="dropdown-menu">
+        <li v-repeat="model: $root.scheme.models">
+          <a href="#"
+            v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
+            v-on="click: addComponent($event, '<%= f.name %>', model)">
+              <i class="icon-plus icon-white"></i>
+              {{ model.label }}
+          </a>
+        </li>
+      </ul>
+    </div>
+  <% end %>
+</div>

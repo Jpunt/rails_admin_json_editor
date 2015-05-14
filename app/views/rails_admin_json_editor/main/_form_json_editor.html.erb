@@ -9,144 +9,21 @@
 
   <% field.models.each do |model| %>
     <script type="text/x-template" id="template-fields-for-<%= model.name %>">
-      <div class="component">
-        <legend>
-          <span class="model-label"><%= model.label %></span>
-          <pre class="guid" v-text="component.guid"></pre>
-
-          <div class="btn-group btn-group-sm pull-right">
-            <% if field.orderable %>
-              <button v-on="click: moveUp" type="button" class="btn btn-default {{ moveUpEnabled ? '' : 'disabled' }}">
-                <i class="icon-circle-arrow-up"></i>
-              </button>
-
-              <button v-on="click: moveDown" type="button" class="btn btn-default {{ moveDownEnabled ? '' : 'disabled' }}">
-                <i class="icon-circle-arrow-down"></i>
-              </button>
-            <% end %>
-
-            <button v-on="click: expanded = !expanded" type="button" class="btn btn-default">
-              <i class="{{ expanded ? 'icon-resize-small' : 'icon-resize-full' }}"></i>
-            </button>
-
-            <button v-on="click:remove" type="button" class="btn btn-default">
-              <i class="icon-remove"></i>
-            </button>
-          </div>
-        </legend>
-
-        <div v-show="expanded">
-          <%= content_tag :p, model.help, class: "help-block" unless model.help.nil? %>
-
-          <% model.fields.each do |f| %>
-            <div class="control-group row <%= f.css_class %>">
-              <label class="col-sm-2 control-label"><%= f.label %></label>
-
-              <div class="controls col-sm-10">
-                <% if f.type == :string %>
-                  <input v-model="component.properties.<%= f.name %>" type="text" class="form-control" />
-                <% end %>
-
-                <% if f.type == :text %>
-                  <textarea v-model="component.properties.<%= f.name %>" class="form-control"></textarea>
-                <% end %>
-
-                <% if f.type == :markdown %>
-                  <div class="markdown-field">
-                    <textarea v-model="component.properties.<%= f.name %>" class="form-control" rows="10"></textarea>
-
-                    <button v-on="click: showPreview = !showPreview" type="button" class="btn btn-default">
-                      <i class="icon-eye-open"></i>
-                    </button>
-                  </div>
-
-                  <div class="markdown-preview" v-show="showPreview">
-                    <div v-html="component.properties.<%= f.name %> | markdown"></div>
-                  </div>
-                <% end %>
-
-                <% if f.type == :boolean %>
-                  <input type="checkbox" v-model="component.properties.<%= f.name %>" class="form-control">
-                <% end %>
-
-                <% if f.type == :enum %>
-                  <%= select_tag(nil, options_for_select(f.enum_options), include_blank: true, class: "form-control", "v-model" => "component.properties.#{f.name}") %>
-                <% end %>
-
-                <% if f.type == :picker %>
-                  <select v-on="change: onChangePicker($event, '<%= f.name %>')" class="form-control record-picker">
-                    <option value=""></option>
-                    <%
-                      records = Rails.cache.fetch("record-picker-#{f.picker_model_name}") do
-                        f.picker_model_name.constantize.send(:all).order(f.picker_label)
-                      end
-                    %>
-                    <% records.each do |record| %>
-                      <option
-                        v-attr="selected: pickerOptionIsSelected('<%= f.name %>', '<%= f.picker_label %>', '<%= record.send(f.picker_label).gsub(/['"]/, '') %>')"
-                        value="<%= record.send(f.picker_label) %>"
-                        data-json="<%= record.to_json %>">
-                          <%= record.send(f.picker_label) %>
-                      </option>
-                    <% end %>
-                  </select>
-                <% end %>
-
-                <% if f.type == :list %>
-                  <div v-repeat="nestedComponent: component.properties.<%= f.name %>">
-                    <div
-                      v-component="fields-for-{{ nestedComponent.model_name }}"
-                      v-with="component: nestedComponent, parentComponents: component.properties.<%= f.name %>, parentIndex: $index">
-                    </div>
-                  </div>
-
-                  <div v-show="!component.properties.<%= f.name %> || component.properties.<%= f.name %>.length < <%= f.list_max_length.nil? ? 999999 : f.list_max_length %>">
-                    <!-- Add nested component -- one model allowed -->
-                    <% if f.list_model_names.count == 1 %>
-                      <a href="#"
-                        class="btn btn-info"
-                        v-repeat="model: $root.scheme.models"
-                        v-show="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
-                        v-on="click: addComponent($event, '<%= f.name %>', model)">
-                          Add {{ model.label | lowercase }}
-                      </a>
-                    <% end %>
-
-                    <!-- Add nested component -- multiple models allowed -->
-                    <% if f.list_model_names.count > 1 %>
-                      <div class="dropdown">
-                        <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                          <li v-repeat="model: $root.scheme.models">
-                            <a href="#"
-                              v-if="nestedModelIsAllowed(model, <%= f.list_model_names %>)"
-                              v-on="click: addComponent($event, '<%= f.name %>', model)">
-                                {{ model.label }}
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
-
-                <%= content_tag :p, f.help, class: "help-block" unless f.help.nil? %>
-              </div>
-            </div>
-          <% end %>
-        </div>
-      </div>
+      <%= render 'rails_admin_json_editor/main/component', field: field, model: model %>
     </script>
   <% end %>
 
-  <!-- List all components and their fields -->
+  <!-- List all content -->
   <div v-repeat="component: components">
     <div v-component="fields-for-{{ component.model_name }}" v-with="component: component, parentComponents: components, parentIndex: $index"></div>
   </div>
 
   <!-- Dropdown to add new content -->
   <div class="dropdown pull-left">
-    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">Add component <b class="caret"></b></a>
+    <a class="dropdown-toggle btn btn-info" data-toggle="dropdown" href="#">
+      <%= I18n.t 'admin.json_editor.add', field_name: 'Component' %>
+      <b class="caret"></b>
+    </a>
 
     <ul class="dropdown-menu">
       <li v-repeat="model: scheme.models">
