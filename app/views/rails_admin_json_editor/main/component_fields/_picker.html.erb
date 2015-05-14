@@ -15,8 +15,16 @@
   </div>
 
   <div v-if="!pickerResult('<%= f.name %>')">
-    <% url = rails_admin.new_path(f.picker_model_name) + '?modal=true' %>
-    <a v-on="click: showPickerModal('<%= f.name %>', '<%= url %>')" class="btn btn-info create">
+    <%
+      base_url = rails_admin.index_path(f.picker_model_name)
+    %>
+
+    <select v-on="change: onChangePickerSelect($event, '<%= f.name %>', '<%= base_url %>')" data-filteringselect="true" data-remote-source="<%= base_url %>?compact=true" placeholder="Search" class="not-initialized-filtering-select" >
+      <option value=""></option>
+      <option value=""></option>
+    </select>
+
+    <a v-on="click: showPickerModal($event, '<%= f.name %>', '<%= base_url %>')" class="btn btn-info create">
       <i class="icon-plus icon-white"></i>
       Add
     </a>

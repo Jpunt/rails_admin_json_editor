@@ -5,6 +5,7 @@
 //= require rails_admin_json_editor/lib/markdown
 
 //= require rails_admin_json_editor/ra.remoteForm.custom
+//= require rails_admin_json_editor/ra.filtering-select.custom
 
 var vm;
 
@@ -86,12 +87,12 @@ $(document).on('rails_admin.dom_ready', function() {
           this.parentComponents[this.parentIndex].properties = clonedproperties;
         },
 
-        showPickerModal: function(fieldName, modalLink) {
+        showPickerModal: function(e, fieldName, baseUrl) {
           var remoteForm = window.jsonEditorRemoteForm;
           var $modal = remoteForm.getModal();
           var self = this;
 
-          remoteForm.init(modalLink)
+          remoteForm.init(baseUrl + '/new?modal=true')
             // Inject form-DOM into modal
             .then(function(form) {
               $modal.find('.modal-body').html(form);
@@ -104,7 +105,7 @@ $(document).on('rails_admin.dom_ready', function() {
 
             // Fetch full JSON
             .then(function(minimalJson) {
-              var url = modalLink.replace('new?modal=true', minimalJson.id) + '.json';
+              var url = baseUrl + '/' + minimalJson.id + '.json';
               return $.get(url);
             })
 
@@ -121,6 +122,18 @@ $(document).on('rails_admin.dom_ready', function() {
                 $('.modal-backdrop, #modal').remove();
               }, 500);
             });
+        },
+
+        onChangePickerSelect: function(e, fieldName, baseUrl) {
+          var self = this;
+          var id = $(e.currentTarget).val();
+          var url = baseUrl + '/' + id + '.json';
+
+          $.get(url).then(function(json) {
+            var clonedproperties = _.clone(self.component.properties);
+            clonedproperties[fieldName] = json;
+            self.parentComponents[self.parentIndex].properties = clonedproperties;
+          });
         },
 
         pickerResult: function(fieldName) {
@@ -164,6 +177,10 @@ $(document).on('rails_admin.dom_ready', function() {
     },
     computed: {
       result: function() {
+        // Hack in jquery filtering select
+        $('.not-initialized-filtering-select').jsonEditorFilteringSelect();
+
+        // Format result
         var result = { components: this.components };
         $(this.$el).trigger('json-editor:changed', result);
         return JSON.stringify(result);
